@@ -123,6 +123,42 @@
         </div>
       </div>
 
+      <div class="forecast-card" id="forecastPanel">
+        <div class="forecast-card-head">
+          <div class="forecast-card-heading">
+            <span class="forecast-card-eyebrow">Next season</span>
+            <h4>Forecast &amp; grower advisory</h4>
+          </div>
+          <span class="glance-tag" id="fcTag" title="A transparent heuristic combining this district's own signal (soil moisture or groundwater), rainfall anomaly, and arrivals trend — not a trained forecasting model. Treat as one input alongside local agriculture-extension advice.">heuristic</span>
+        </div>
+
+        <div class="forecast-hero">
+          <div class="forecast-stat">
+            <div class="forecast-stat-label">Current price</div>
+            <div class="forecast-stat-value is-loading" id="fcCurrentPrice">0000000</div>
+            <div class="forecast-stat-sub" id="fcCurrentSub"></div>
+          </div>
+          <div class="forecast-arrow-wrap">
+            <div class="forecast-arrow">→</div>
+          </div>
+          <div class="forecast-stat">
+            <div class="forecast-stat-label">Forecast, next season</div>
+            <div class="forecast-stat-value is-loading" id="fcForecastPrice">0000000</div>
+            <div class="forecast-stat-sub" id="fcPctSub"></div>
+          </div>
+        </div>
+
+        <p class="forecast-basis" id="fcBasis"></p>
+
+        <details class="advisory-details" open>
+          <summary class="advisory-heading">
+            <span>Advisory for growers</span>
+            <span class="advisory-chevron" aria-hidden="true">▾</span>
+          </summary>
+          <ul class="advisory-list" id="advisoryList"></ul>
+        </details>
+      </div>
+
       <div class="panel panel-metrics">
         <div class="panel-head-row">
           <h4 data-i18n="metrics_title">Current &amp; forecast — key variables</h4>
@@ -190,29 +226,6 @@
         <h4>Mandi arrivals &amp; modal price</h4>
         <div class="chart-wrap"><canvas id="priceChart"></canvas></div>
         <p class="live-price" id="livePriceLine"></p>
-      </div>
-
-      <div class="panel panel-forecast">
-        <div class="panel-head-row">
-          <h4>Next-season forecast &amp; grower advisory</h4>
-          <span class="glance-tag" id="fcTag" title="A transparent heuristic combining this district's own signal (soil moisture or groundwater), rainfall anomaly, and arrivals trend — not a trained forecasting model. Treat as one input alongside local agriculture-extension advice.">heuristic</span>
-        </div>
-        <div class="forecast-row">
-          <div class="forecast-stat">
-            <div class="forecast-stat-label">Current price</div>
-            <div class="forecast-stat-value is-loading" id="fcCurrentPrice">0000000</div>
-            <div class="forecast-stat-sub" id="fcCurrentSub"></div>
-          </div>
-          <div class="forecast-arrow">→</div>
-          <div class="forecast-stat">
-            <div class="forecast-stat-label">Forecast, next season</div>
-            <div class="forecast-stat-value is-loading" id="fcForecastPrice">0000000</div>
-            <div class="forecast-stat-sub" id="fcPctSub"></div>
-          </div>
-        </div>
-        <p class="forecast-basis" id="fcBasis"></p>
-        <h5 class="advisory-heading">Advisory for growers</h5>
-        <ul class="advisory-list" id="advisoryList"></ul>
       </div>
 
       <div class="panel-actions">
