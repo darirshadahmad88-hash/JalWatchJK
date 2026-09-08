@@ -45,7 +45,6 @@
   <div class="nav-links">
     <a href="#overview" data-i18n="nav_overview">Overview</a>
     <a href="#dashboard" data-i18n="nav_dashboard">Dashboard</a>
-    <a href="#link" data-i18n="nav_links">Signal links</a>
     <a href="#method" data-i18n="nav_method">Methodology</a>
     <a href="#sources" data-i18n="nav_sources">Data sources</a>
   </div>
@@ -335,75 +334,6 @@
       and growers — deliberately not framed as a price forecast.</p>
     </div>
   </div>
-</section>
-
-<!-- ===================== SIGNAL LINKS ===================== -->
-<!-- Cross-checks rainfall, soil moisture, flood risk, and mandi price
-     for whichever district is selected in the dashboard above, and
-     highlights which causal path (deficit vs. excess) the live readings
-     currently support. Rainfall + soil moisture are NASA POWER (keyless,
-     live); flood status is the same Google Flood Hub / Open-Meteo feed
-     as the floating widget; price is Agmarknet via data.gov.in. See
-     README for what's live vs. demo. -->
-<section id="link" class="section section-dark">
-  <div class="section-head">
-    <div class="kicker" data-i18n="links_kicker">Signal links</div>
-    <h2 data-i18n="links_h2">How rainfall, soil moisture, floods, and price connect — right now</h2>
-    <p class="section-sub" id="linkSubhead">For <b id="linkDistrictName">Shopian</b>: too little rain lowers soil
-    moisture and squeezes arrivals; too much raises flood risk and disrupts them the other way. Both paths show up
-    at the mandi.</p>
-  </div>
-
-  <div class="link-cards">
-    <div class="link-card" id="linkCardRain">
-      <div class="link-card-label">Rainfall</div>
-      <div class="link-card-value is-loading" id="linkRainVal">00.0 mm/day</div>
-      <div class="link-card-sub" id="linkRainSub">Loading…</div>
-    </div>
-    <div class="link-card" id="linkCardSoil">
-      <div class="link-card-label" id="linkSoilLabel">Soil moisture</div>
-      <div class="link-card-value is-loading" id="linkSoilVal">00.0%</div>
-      <div class="link-card-sub" id="linkSoilSub">Loading…</div>
-    </div>
-    <div class="link-card" id="linkCardFlood">
-      <div class="link-card-label">Floods (Jhelum)</div>
-      <div class="link-card-value is-loading" id="linkFloodVal">—</div>
-      <div class="link-card-sub" id="linkFloodSub">Loading…</div>
-    </div>
-    <div class="link-card" id="linkCardPrice">
-      <div class="link-card-label">Mandi price</div>
-      <div class="link-card-value is-loading" id="linkPriceVal">₹0000/qtl</div>
-      <div class="link-card-sub" id="linkPriceSub">Loading…</div>
-    </div>
-  </div>
-
-  <div class="link-flow">
-    <div class="link-node link-node-gray" id="flowRain">
-      <div class="flow-title">Rainfall</div>
-      <div class="flow-sub">Monthly precipitation</div>
-    </div>
-    <div class="flow-branch-row">
-      <div class="flow-arrow flow-arrow-l" id="flowArrowSoil"><span>↙</span></div>
-      <div class="flow-arrow flow-arrow-r" id="flowArrowFlood"><span>↘</span></div>
-    </div>
-    <div class="flow-mid-row">
-      <div class="link-node link-node-teal" id="flowSoil">
-        <div class="flow-title">Soil moisture</div>
-        <div class="flow-sub">Deficit path — apple orchards</div>
-      </div>
-      <div class="link-node link-node-blue" id="flowFlood">
-        <div class="flow-title">Floods</div>
-        <div class="flow-sub">Excess path — Jhelum at Srinagar</div>
-      </div>
-    </div>
-    <div class="flow-arrow flow-arrow-down" id="flowArrowDown"><span>↓</span></div>
-    <div class="link-node link-node-coral" id="flowArrivals">
-      <div class="flow-title">Mandi arrivals &amp; price</div>
-      <div class="flow-sub" id="flowArrivalsSub">Volume + price at the market</div>
-    </div>
-  </div>
-
-  <p class="link-narrative" id="linkNarrative">Loading current readings…</p>
 </section>
 
 <!-- ===================== METHODOLOGY ===================== -->
