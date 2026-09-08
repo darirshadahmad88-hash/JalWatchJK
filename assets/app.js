@@ -73,58 +73,6 @@ function slice(arr) {
 }
 
 // ---------------------------------------------------------------
-// Sidebar list + search filter
-// ---------------------------------------------------------------
-function renderSidebar() {
-  const list = document.getElementById('districtList');
-  list.innerHTML = '';
-  DISTRICTS.forEach(d => {
-    const row = document.createElement('div');
-    row.className = 'district-row' + (d.id === currentId ? ' active' : '');
-    row.dataset.search = (d.name + ' ' + d.crop).toLowerCase();
-    const cropDotClass = d.crop === 'Apple' ? 'dot-apple' : 'dot-saffron';
-    row.innerHTML = `
-      <div>
-        <div class="name">${d.name.split(',')[0]}</div>
-        <span class="crop"><span class="crop-dot ${cropDotClass}"></span>${d.crop}</span>
-      </div>
-      <div class="idx" style="color:${statusColor(d.status)}">
-        <span class="status-dot" style="background:${statusColor(d.status)}"></span>${d.idx.toFixed(1)}
-      </div>
-    `;
-    row.addEventListener('click', () => selectDistrict(d.id));
-    list.appendChild(row);
-  });
-  applySearchFilter();
-}
-
-function applySearchFilter() {
-  const q = (document.getElementById('districtSearch').value || '').trim().toLowerCase();
-  document.querySelectorAll('.district-row').forEach(row => {
-    row.classList.toggle('hidden', q.length > 0 && !row.dataset.search.includes(q));
-  });
-}
-
-// ---------------------------------------------------------------
-// Compare mode
-// ---------------------------------------------------------------
-function renderCompareSelect() {
-  const select = document.getElementById('compareSelect');
-  select.innerHTML = '';
-  DISTRICTS.filter(d => d.id !== currentId).forEach(d => {
-    const opt = document.createElement('option');
-    opt.value = d.id;
-    opt.textContent = `${d.name.split(',')[0]} (${d.crop})`;
-    select.appendChild(opt);
-  });
-  if (compareId && compareId !== currentId) {
-    select.value = compareId;
-  } else {
-    compareId = select.value || null;
-  }
-}
-
-// ---------------------------------------------------------------
 // Date-range slider
 // ---------------------------------------------------------------
 function updateSliderVisual() {
@@ -299,8 +247,6 @@ function selectDistrict(id) {
   );
   fadeSwap(insightEl);
 
-  renderSidebar();
-  renderCompareSelect();
   renderCharts();
   refreshMapHighlight();
   if (leafletMap) leafletMap.panTo([d.lat, d.lon]);
@@ -1119,24 +1065,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const to = Number(el.dataset.countTo);
     const suffix = el.dataset.suffix || '';
     animateValue(el, to, { duration: 900, format: v => Math.round(v).toLocaleString('en-IN') + suffix });
-  });
-
-  document.getElementById('districtSearch').addEventListener('input', applySearchFilter);
-
-  const compareToggle = document.getElementById('compareToggle');
-  const compareSelect = document.getElementById('compareSelect');
-  compareToggle.addEventListener('change', () => {
-    compareSelect.disabled = !compareToggle.checked;
-    if (compareToggle.checked) {
-      renderCompareSelect();
-    } else {
-      compareId = null;
-    }
-    renderCharts();
-  });
-  compareSelect.addEventListener('change', () => {
-    compareId = compareSelect.value || null;
-    renderCharts();
   });
 
   document.getElementById('exportCsvBtn').addEventListener('click', exportCsv);
