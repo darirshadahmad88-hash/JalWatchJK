@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Jal Watch — Water Stress Early Warning for J&K Agriculture</title>
+<meta name="description" content="Correlating CGWB groundwater telemetry with Agmarknet mandi prices to give early warning of agricultural stress in Jammu & Kashmir.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js" defer></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js" defer></script>
+<link rel="stylesheet" href="assets/styles.css">
+</head>
+<body>
+
+<!-- ===================== FLOOD WATCH WIDGET ===================== -->
+<!-- Small floating dashboard, independent of the crop-stress dashboard
+     below: this tracks river-flood risk on the Jhelum, not agricultural
+     water stress. See README "Flood Watch" section for data sourcing
+     and honesty notes. -->
+<aside id="floodWidget" class="flood-widget" aria-live="polite">
+  <button type="button" id="floodWidgetToggle" class="flood-widget-toggle" aria-expanded="true" aria-controls="floodWidgetBody">
+    <span class="flood-widget-dot" id="floodDot"></span>
+    <span class="flood-widget-title">Flood Watch</span>
+    <span class="flood-widget-chevron">▾</span>
+  </button>
+  <div id="floodWidgetBody" class="flood-widget-body">
+    <div class="flood-widget-loc">Jhelum · Ram Munshi Bagh, Srinagar</div>
+    <div class="flood-status-row">
+      <span class="flood-status-pill is-loading" id="floodStatusPill">Loading…</span>
+      <span class="flood-trend" id="floodTrend"></span>
+    </div>
+    <div class="flood-thresholds" id="floodThresholds"></div>
+    <div class="flood-meta-row">
+      <span class="flood-live-badge" id="floodLiveBadge">Checking…</span>
+      <span class="flood-updated" id="floodUpdated"></span>
+    </div>
+  </div>
+</aside>
+
+<!-- ===================== NAV ===================== -->
+<nav class="nav">
+  <a href="#top" class="nav-brand">Jal Watch <span>·</span> <span class="nav-brand-sub">J&amp;K</span></a>
+  <div class="nav-links">
+    <a href="#overview">Overview</a>
+    <a href="#dashboard">Dashboard</a>
+    <a href="#link">Signal links</a>
+    <a href="#method">Methodology</a>
+    <a href="#sources">Data sources</a>
+  </div>
+</nav>
+
+<!-- ===================== AT-A-GLANCE ===================== -->
+<section class="glance-bar" id="glance">
+  <div class="glance-inner">
+    <div class="glance-card">
+      <div class="glance-label"><span class="crop-dot dot-apple"></span>Apple districts, soil moisture</div>
+      <div class="glance-value is-loading" id="glanceWater">00.0%</div>
+      <div class="glance-sub" id="glanceWaterSub">Loading…</div>
+    </div>
+    <div class="glance-card">
+      <div class="glance-label"><span class="crop-dot dot-apple"></span>Apple mandi price</div>
+      <div class="glance-value is-loading" id="glancePrice">0000000</div>
+      <div class="glance-sub" id="glancePriceSub">Loading…</div>
+    </div>
+    <div class="glance-card glance-forecast">
+      <div class="glance-label">Next-season signal <span class="glance-tag" title="A transparent heuristic based on soil-moisture and rainfall anomalies for apple districts (groundwater for saffron) — not a trained forecasting model.">heuristic</span></div>
+      <div class="glance-value is-loading" id="glanceForecast">0000000</div>
+      <div class="glance-sub" id="glanceForecastSub">Loading…</div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== HERO ===================== -->
+<header id="top" class="hero">
+  <svg class="hero-contours" viewBox="0 0 460 340" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+    <g fill="none" stroke="#b8672a" stroke-width="1">
+      <path d="M40,300 C120,260 160,180 130,110 C110,60 150,20 220,30" opacity="0.18"/>
+      <path d="M70,320 C150,285 190,205 165,135 C148,85 185,45 250,50" opacity="0.28"/>
+      <path d="M100,335 C180,305 218,230 198,160 C182,112 218,72 278,72" opacity="0.4"/>
+      <path d="M135,340 C210,320 245,250 228,185 C214,140 248,102 305,98" opacity="0.55"/>
+    </g>
+  </svg>
+  <div class="hero-inner">
+    <div class="kicker reveal reveal-1">Early warning for agricultural water stress</div>
+    <h1 class="reveal reveal-2">The water table drops months<br>before the mandi price does.</h1>
+    <p class="hero-lede reveal reveal-3">
+      Jal Watch reads CGWB's telemetric groundwater sensors across saffron and apple-growing
+      districts of Jammu &amp; Kashmir, and lines them up against years of Agmarknet mandi
+      records — turning a slow, quiet decline underground into a warning that officials and
+      growers can act on before harvest.
+    </p>
+    <div class="hero-actions reveal reveal-4">
+      <a href="#dashboard" class="btn btn-primary">Open the dashboard</a>
+      <a href="#method" class="btn btn-ghost">How the index works</a>
+    </div>
+  </div>
+  <div class="hero-stat-row">
+    <div class="hero-stat">
+      <div class="hero-stat-num" data-count-to="5260" data-suffix="+">0</div>
+      <div class="hero-stat-label">CGWB DWLR stations nationwide, feeding readings every six hours</div>
+    </div>
+    <div class="hero-stat">
+      <div class="hero-stat-num" data-count-to="19">0</div>
+      <div class="hero-stat-label">APMC markets reporting daily in J&amp;K via Agmarknet</div>
+    </div>
+    <div class="hero-stat">
+      <div class="hero-stat-num" data-count-to="2">0</div>
+      <div class="hero-stat-label">Signals combined into one district-level stress score</div>
+    </div>
+  </div>
+</header>
+
+<!-- ===================== OVERVIEW ===================== -->
+<section id="overview" class="section">
+  <div class="section-head">
+    <div class="kicker">Overview</div>
+    <h2>Two feeds, one signal, months of lead time</h2>
+  </div>
+  <div class="overview-grid">
+    <div class="overview-card">
+      <div class="overview-num">01</div>
+      <h3>Groundwater telemetry</h3>
+      <p>Digital Water Level Recorders under CGWB's National Hydrology Project transmit
+      depth-to-water readings every six hours, surfaced publicly through India-WRIS. We track
+      the districts behind J&amp;K's saffron and apple economy.</p>
+    </div>
+    <div class="overview-card">
+      <div class="overview-num">02</div>
+      <h3>Mandi price history</h3>
+      <p>Agmarknet publishes daily arrivals and modal prices across 19 J&amp;K markets. Years
+      of this record let us see how past droughts and extraction stress actually showed up at
+      the market — not just in theory.</p>
+    </div>
+    <div class="overview-card">
+      <div class="overview-num">03</div>
+      <h3>A stress score, not a prophecy</h3>
+      <p>We compute a seasonal z-score for water level per district, adjusted for rainfall, and
+      show its historical relationship to arrivals. It's a decision-support signal for officials
+      and growers — deliberately not framed as a price forecast.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== DASHBOARD ===================== -->
+<section id="dashboard" class="section section-dark">
+  <div class="section-head">
+    <div class="kicker">Dashboard</div>
+    <h2>District water stress dashboard</h2>
+    <p class="section-sub">Sample values shown below — wire in <code>assets/data.js</code> to a live
+    feed to make this real. See the README for the API notes.</p>
+  </div>
+
+  <div class="dash-layout">
+    <div class="dash-sidebar">
+      <div class="dash-sidebar-label">Districts on the DWLR network</div>
+      <input type="text" id="districtSearch" class="search-input" placeholder="Search district or crop…" autocomplete="off">
+      <div id="districtList"></div>
+
+      <div class="compare-block">
+        <label class="compare-label">
+          <input type="checkbox" id="compareToggle">
+          Compare with another district
+        </label>
+        <select id="compareSelect" class="compare-select" disabled></select>
+      </div>
+    </div>
+
+    <div class="dash-main">
+      <div class="dash-heading-row">
+        <div>
+          <div class="kicker" id="cropLabel">SAFFRON</div>
+          <h3 id="districtName">Pampore, Anantnag</h3>
+        </div>
+        <div class="pill-group">
+          <div class="status-pill" id="statusPill">Water stress index: 1.8</div>
+          <div class="live-badge" id="liveBadge">Demo price data</div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-head-row">
+          <h4>District map</h4>
+          <span class="panel-hint">Click a marker to select it</span>
+        </div>
+        <div id="mapView" class="map-view"></div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-head-row">
+          <h4>Time range</h4>
+          <span class="range-readout" id="rangeReadout"></span>
+        </div>
+        <div class="dual-slider">
+          <div class="dual-slider-track"></div>
+          <div class="dual-slider-fill" id="sliderFill"></div>
+          <input type="range" id="rangeStart" min="0" max="35" value="0" step="1">
+          <input type="range" id="rangeEnd" min="0" max="35" value="35" step="1">
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-head-row">
+          <h4 id="waterChartTitle">GROUNDWATER LEVEL VS. RAINFALL</h4>
+          <span class="panel-hint" id="waterChartHint"></span>
+        </div>
+        <div class="chart-wrap"><canvas id="waterChart"></canvas></div>
+        <p class="live-price" id="waterChartNote"></p>
+      </div>
+
+      <div class="panel">
+        <h4>Mandi arrivals &amp; modal price</h4>
+        <div class="chart-wrap"><canvas id="priceChart"></canvas></div>
+        <p class="live-price" id="livePriceLine"></p>
+      </div>
+
+      <div class="panel panel-forecast">
+        <div class="panel-head-row">
+          <h4>Next-season forecast &amp; grower advisory</h4>
+          <span class="glance-tag" id="fcTag" title="A transparent heuristic combining this district's own signal (soil moisture or groundwater), rainfall anomaly, and arrivals trend — not a trained forecasting model. Treat as one input alongside local agriculture-extension advice.">heuristic</span>
+        </div>
+        <div class="forecast-row">
+          <div class="forecast-stat">
+            <div class="forecast-stat-label">Current price</div>
+            <div class="forecast-stat-value is-loading" id="fcCurrentPrice">0000000</div>
+            <div class="forecast-stat-sub" id="fcCurrentSub"></div>
+          </div>
+          <div class="forecast-arrow">→</div>
+          <div class="forecast-stat">
+            <div class="forecast-stat-label">Forecast, next season</div>
+            <div class="forecast-stat-value is-loading" id="fcForecastPrice">0000000</div>
+            <div class="forecast-stat-sub" id="fcPctSub"></div>
+          </div>
+        </div>
+        <p class="forecast-basis" id="fcBasis"></p>
+        <h5 class="advisory-heading">Advisory for growers</h5>
+        <ul class="advisory-list" id="advisoryList"></ul>
+      </div>
+
+      <div class="panel-actions">
+        <button id="exportCsvBtn" class="btn-small">Export CSV</button>
+      </div>
+
+      <p class="insight" id="insightText"></p>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== SIGNAL LINKS ===================== -->
+<!-- Cross-checks rainfall, soil moisture, flood risk, and mandi price
+     for whichever district is selected in the dashboard above, and
+     highlights which causal path (deficit vs. excess) the live readings
+     currently support. Rainfall + soil moisture are NASA POWER (keyless,
+     live); flood status is the same Google Flood Hub / Open-Meteo feed
+     as the floating widget; price is Agmarknet via data.gov.in. See
+     README for what's live vs. demo. -->
+<section id="link" class="section section-dark">
+  <div class="section-head">
+    <div class="kicker">Signal links</div>
+    <h2>How rainfall, soil moisture, floods, and price connect — right now</h2>
+    <p class="section-sub" id="linkSubhead">For <b id="linkDistrictName">Shopian</b>: too little rain lowers soil
+    moisture and squeezes arrivals; too much raises flood risk and disrupts them the other way. Both paths show up
+    at the mandi.</p>
+  </div>
+
+  <div class="link-cards">
+    <div class="link-card" id="linkCardRain">
+      <div class="link-card-label">Rainfall</div>
+      <div class="link-card-value is-loading" id="linkRainVal">00.0 mm/day</div>
+      <div class="link-card-sub" id="linkRainSub">Loading…</div>
+    </div>
+    <div class="link-card" id="linkCardSoil">
+      <div class="link-card-label" id="linkSoilLabel">Soil moisture</div>
+      <div class="link-card-value is-loading" id="linkSoilVal">00.0%</div>
+      <div class="link-card-sub" id="linkSoilSub">Loading…</div>
+    </div>
+    <div class="link-card" id="linkCardFlood">
+      <div class="link-card-label">Floods (Jhelum)</div>
+      <div class="link-card-value is-loading" id="linkFloodVal">—</div>
+      <div class="link-card-sub" id="linkFloodSub">Loading…</div>
+    </div>
+    <div class="link-card" id="linkCardPrice">
+      <div class="link-card-label">Mandi price</div>
+      <div class="link-card-value is-loading" id="linkPriceVal">₹0000/qtl</div>
+      <div class="link-card-sub" id="linkPriceSub">Loading…</div>
+    </div>
+  </div>
+
+  <div class="link-flow">
+    <div class="link-node link-node-gray" id="flowRain">
+      <div class="flow-title">Rainfall</div>
+      <div class="flow-sub">Monthly precipitation</div>
+    </div>
+    <div class="flow-branch-row">
+      <div class="flow-arrow flow-arrow-l" id="flowArrowSoil"><span>↙</span></div>
+      <div class="flow-arrow flow-arrow-r" id="flowArrowFlood"><span>↘</span></div>
+    </div>
+    <div class="flow-mid-row">
+      <div class="link-node link-node-teal" id="flowSoil">
+        <div class="flow-title">Soil moisture</div>
+        <div class="flow-sub">Deficit path — apple orchards</div>
+      </div>
+      <div class="link-node link-node-blue" id="flowFlood">
+        <div class="flow-title">Floods</div>
+        <div class="flow-sub">Excess path — Jhelum at Srinagar</div>
+      </div>
+    </div>
+    <div class="flow-arrow flow-arrow-down" id="flowArrowDown"><span>↓</span></div>
+    <div class="link-node link-node-coral" id="flowArrivals">
+      <div class="flow-title">Mandi arrivals &amp; price</div>
+      <div class="flow-sub" id="flowArrivalsSub">Volume + price at the market</div>
+    </div>
+  </div>
+
+  <p class="link-narrative" id="linkNarrative">Loading current readings…</p>
+</section>
+
+<!-- ===================== METHODOLOGY ===================== -->
+<section id="method" class="section">
+  <div class="section-head">
+    <div class="kicker">Methodology</div>
+    <h2>How the stress index is built</h2>
+  </div>
+  <ol class="method-list">
+    <li>
+      <span class="method-step">1</span>
+      <div>
+        <h4>Match the signal to the crop, not just the sensor</h4>
+        <p>Saffron corms sit close to the aquifer, so Pampore's index still runs on DWLR
+        depth-to-water. Apple orchards in Kashmir are largely rain-fed — growers and agronomists
+        report they respond to root-zone soil moisture and winter snowpack, not the water table
+        directly. So Shopian, Sopore, and Pulwama are scored on a soil-moisture series (derived
+        from rainfall, with a damped lag matching how moisture actually persists in soil) instead
+        of raw groundwater depth. Each is baselined against its own historical same-season values,
+        not a flat annual average.</p>
+      </div>
+    </li>
+    <li>
+      <span class="method-step">2</span>
+      <div>
+        <h4>Adjust for rainfall</h4>
+        <p>A dry monsoon and over-extraction look identical in raw water-level data. Overlaying
+        IMD rainfall lets the index distinguish "drought year" from "structural decline" —
+        the second is the one worth escalating.</p>
+      </div>
+    </li>
+    <li>
+      <span class="method-step">3</span>
+      <div>
+        <h4>Score, don't predict</h4>
+        <p>The output is a z-score bucketed into normal / watch / stress / severe, alongside
+        the closest historical analogue season and what happened to arrivals and prices then.
+        No price forecast is generated — the historical parallel is left for a human to judge.</p>
+      </div>
+    </li>
+    <li>
+      <span class="method-step">4</span>
+      <div>
+        <h4>Alert two audiences differently</h4>
+        <p>Farmers get a short, local-language irrigation-planning nudge. District officials and
+        APMC administrators get the full dashboard for procurement and drought-relief planning.</p>
+      </div>
+    </li>
+    <li>
+      <span class="method-step">5</span>
+      <div>
+        <h4>The top-of-page signal is a formula, not a model</h4>
+        <p>The "next-season signal" shown at the top of this page is a documented heuristic —
+        it moves in proportion to how far current water and rainfall readings sit from their
+        seasonal average, using constants we chose and disclosed rather than fitted from data.
+        It's there to make the water-price relationship legible at a glance, not to claim
+        predictive accuracy.</p>
+      </div>
+    </li>
+  </ol>
+</section>
+
+<!-- ===================== SOURCES ===================== -->
+<section id="sources" class="section section-dark">
+  <div class="section-head">
+    <div class="kicker">Data sources</div>
+    <h2>Real, public, structured</h2>
+  </div>
+  <div class="sources-grid">
+    <div class="source-card">
+      <h4>CGWB / India-WRIS</h4>
+      <p>Groundwater level readings from telemetric DWLR stations under the National Hydrology
+      Project. Surfaced via the India-WRIS public portal.</p>
+      <a href="https://indiawris.gov.in" target="_blank" rel="noopener">indiawris.gov.in →</a>
+    </div>
+    <div class="source-card">
+      <h4>Agmarknet / data.gov.in</h4>
+      <p>Daily mandi arrivals and price data across J&amp;K's 19 APMC markets, available through
+      a documented public API.</p>
+      <a href="https://data.gov.in" target="_blank" rel="noopener">data.gov.in →</a>
+    </div>
+    <div class="source-card">
+      <h4>IMD rainfall (optional layer)</h4>
+      <p>District-level rainfall used to separate drought-driven decline from over-extraction
+      in the stress index.</p>
+      <a href="https://mausam.imd.gov.in" target="_blank" rel="noopener">mausam.imd.gov.in →</a>
+    </div>
+    <div class="source-card">
+      <h4>NASA POWER (root-zone soil wetness)</h4>
+      <p>Live current reading for apple districts via the free, keyless GWETROOT
+      parameter (MERRA-2 reanalysis) — the historical trend line is still derived
+      from demo rainfall; see README for backfilling it with real POWER data.</p>
+      <a href="https://power.larc.nasa.gov" target="_blank" rel="noopener">power.larc.nasa.gov →</a>
+    </div>
+    <div class="source-card">
+      <h4>Google Flood Hub / CWC (Jhelum flood status)</h4>
+      <p>The top-right Flood Watch widget reads the Jhelum gauge at Ram Munshi
+      Bagh — severity, trend, and threshold levels sourced from CWC via
+      Google's Flood Forecasting API. Needs a waitlisted API key; shows a
+      clearly-labelled demo reading until one is set. See README.</p>
+      <a href="https://sites.research.google/floods" target="_blank" rel="noopener">sites.research.google/floods →</a>
+    </div>
+  </div>
+</section>
+
+<footer class="footer">
+  <div>Jal Watch — built for Smart India Hackathon. Prototype uses illustrative data; see README for wiring in live feeds.</div>
+</footer>
+
+<script src="assets/data.js"></script>
+<script src="assets/app.js"></script>
+</body>
+</html>
