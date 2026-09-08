@@ -275,7 +275,7 @@ function selectDistrict(id) {
 
   document.getElementById('cropLabel').textContent = d.crop;
   const nameEl = document.getElementById('districtName');
-  nameEl.textContent = d.name;
+  nameEl.textContent = d.name.split(',')[0];
   fadeSwap(nameEl);
 
   const pill = document.getElementById('statusPill');
@@ -954,6 +954,22 @@ function initChartToggles() {
 }
 
 // ---------------------------------------------------------------
+// Overview / Methodology / Data sources are collapsed <details>
+// sections by default. If a link jumps to one (nav bar, hero CTAs),
+// auto-expand it so the person doesn't land on a closed panel.
+// ---------------------------------------------------------------
+function initCollapsibleSectionLinks() {
+  document.querySelectorAll('a[href^="#"]').forEach(link => {
+    link.addEventListener('click', () => {
+      const id = link.getAttribute('href').slice(1);
+      const target = document.getElementById(id);
+      const details = target && target.querySelector(':scope > details.collapsible-section');
+      if (details) details.open = true;
+    });
+  });
+}
+
+// ---------------------------------------------------------------
 // Wire up static controls once, then do the initial render
 // ---------------------------------------------------------------
 document.addEventListener('DOMContentLoaded', () => {
@@ -969,6 +985,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initMap();
   initFloodWidget();
   initChartToggles();
+  initCollapsibleSectionLinks();
   renderDistrictDropdown();
   selectDistrict(currentId);
   renderGlance();
