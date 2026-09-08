@@ -238,6 +238,28 @@ code{
   margin:0 auto;
 }
 .section-head{margin-bottom:44px; max-width:620px;}
+
+/* ---------- collapsible sections (overview / methodology / sources) ---------- */
+/* Collapsed by default; native <details>/<summary> so it works even
+   if JS fails, plus a small enhancement in app.js to auto-expand
+   when a nav link jumps to one of these sections. */
+.collapsible-section{border:0; margin:0; padding:0;}
+.collapsible-section > summary{
+  list-style:none; cursor:pointer;
+  display:flex; align-items:flex-start; justify-content:space-between; gap:20px;
+}
+.collapsible-section > summary::-webkit-details-marker{display:none;}
+.collapsible-section .section-head{margin-bottom:0;}
+.collapsible-section[open] .section-head{margin-bottom:44px;}
+.section-chevron{
+  flex:none; font-size:15px; line-height:1; color:var(--ink-dim);
+  margin-top:4px; transition:transform .25s var(--ease), color .18s var(--ease);
+}
+.collapsible-section[open] > summary .section-chevron{transform:rotate(180deg);}
+.collapsible-section > summary:hover .section-chevron{color:var(--saffron);}
+.section-dark .section-chevron{color:var(--ink-light-dim);}
+.section-dark .collapsible-section > summary:hover .section-chevron{color:var(--saffron-bright);}
+.section-body{animation:reveal .3s var(--ease);}
 .section-head h2{
   font-family:var(--serif);
   font-weight:500;
@@ -552,14 +574,14 @@ code{
 .forecast-stat{min-width:150px; flex:1;}
 .forecast-stat-label{font-size:11.5px; color:var(--ink-light-dim); letter-spacing:.02em; margin-bottom:4px;}
 .forecast-stat-value{font-family:var(--serif); font-size:26px; color:var(--ink-light); font-variant-numeric:tabular-nums;}
-.forecast-stat-value.up{color:var(--stress);}
-.forecast-stat-value.down{color:var(--normal);}
+.forecast-stat-value.up{color:var(--normal);}
+.forecast-stat-value.down{color:var(--stress);}
 .forecast-stat-sub{
   display:inline-block; font-size:11.5px; color:var(--ink-light-dim); margin-top:6px;
   padding:2px 9px; border-radius:20px; background:rgba(255,255,255,0.06);
 }
-.forecast-stat-value.up + .forecast-stat-sub{color:var(--stress); background:rgba(168,68,47,0.16);}
-.forecast-stat-value.down + .forecast-stat-sub{color:var(--normal); background:rgba(95,119,70,0.16);}
+.forecast-stat-value.up + .forecast-stat-sub{color:var(--normal); background:rgba(95,119,70,0.16);}
+.forecast-stat-value.down + .forecast-stat-sub{color:var(--stress); background:rgba(168,68,47,0.16);}
 .forecast-arrow-wrap{flex:none; display:flex; align-items:center; justify-content:center;}
 .forecast-arrow{
   font-size:18px; color:var(--bg-dark); background:var(--saffron-bright);
@@ -612,8 +634,10 @@ code{
 }
 
 /* ---------- flood watch widget (fixed, top-right) ---------- */
+/* top offset is pushed below the sticky nav bar (~64px tall) so this
+   floating card never overlaps the nav's language switch */
 .flood-widget{
-  position:fixed; top:16px; right:16px; z-index:60;
+  position:fixed; top:76px; right:16px; z-index:45;
   width:252px; max-width:calc(100vw - 32px);
   background:var(--bg);
   border:1px solid var(--line);
