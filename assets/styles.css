@@ -470,7 +470,52 @@ code{
 .dot-saffron{background:var(--saffron);}
 .dot-apple{background:var(--apple);}
 .status-dot{width:6px; height:6px; border-radius:50%; display:inline-block; margin-right:7px; flex:none;}
-.dash-main{padding:26px 30px 10px;}
+.dash-main{padding:26px 30px 10px; display:flex; flex-direction:column;}
+.dash-main-footer{margin-top:auto; padding-top:32px; max-width:560px;}
+.dash-main-footer .hero-kicker-badge{margin-bottom:18px;}
+.dash-echo-card{
+  background:
+    radial-gradient(140% 140% at 0% 0%, rgba(214,138,66,0.10), transparent 55%),
+    var(--panel-dark);
+  border:1px solid var(--line-dark);
+  border-radius:14px;
+  padding:26px 28px 24px;
+}
+.dash-echo-h1{
+  font-family:var(--serif);
+  font-weight:500;
+  font-size:clamp(22px, 2.6vw, 30px);
+  line-height:1.18;
+  color:var(--ink-light);
+  margin:0 0 12px;
+}
+.dash-echo-lede{
+  font-size:14.5px;
+  line-height:1.55;
+  color:var(--ink-light-dim);
+  margin:0;
+}
+.dash-echo-stats{
+  display:flex;
+  gap:28px;
+  margin-top:22px;
+  padding-top:18px;
+  border-top:1px solid var(--line-dark);
+  justify-content:flex-start;
+}
+.dash-echo-stat{max-width:150px;}
+.dash-echo-stat-num{
+  font-family:var(--serif);
+  font-size:24px;
+  color:var(--saffron-bright);
+  font-variant-numeric:tabular-nums;
+}
+.dash-echo-stat-label{
+  font-size:11.5px;
+  line-height:1.4;
+  color:var(--ink-light-dim);
+  margin-top:5px;
+}
 .dash-heading-row{
   display:flex; justify-content:space-between; align-items:flex-end; flex-wrap:wrap; gap:12px;
   margin-bottom:20px;
