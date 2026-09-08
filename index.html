@@ -41,6 +41,20 @@
 
 <!-- ===================== NAV ===================== -->
 <nav class="nav">
+  <div class="nav-menu" id="navMenu">
+    <button type="button" class="nav-menu-toggle" id="navMenuToggle" aria-expanded="false" aria-controls="navMenuDropdown" aria-label="Open menu">
+      <span class="nav-menu-bar"></span>
+      <span class="nav-menu-bar"></span>
+      <span class="nav-menu-bar"></span>
+    </button>
+    <div class="nav-menu-dropdown" id="navMenuDropdown">
+      <a href="#overview" data-i18n="nav_overview">Overview</a>
+      <a href="#dashboard" data-i18n="nav_dashboard">Dashboard</a>
+      <a href="#method" data-i18n="nav_method">Methodology</a>
+      <a href="#sources" data-i18n="nav_sources">Data sources</a>
+    </div>
+  </div>
+
   <a href="#top" class="nav-brand">Jal Watch <span>·</span> <span class="nav-brand-sub">J&amp;K</span></a>
 
   <!-- Compact at-a-glance strip, moved into the nav row itself so it's
@@ -68,12 +82,6 @@
   </div>
 
   <div class="nav-right">
-    <div class="nav-links">
-      <a href="#overview" data-i18n="nav_overview">Overview</a>
-      <a href="#dashboard" data-i18n="nav_dashboard">Dashboard</a>
-      <a href="#method" data-i18n="nav_method">Methodology</a>
-      <a href="#sources" data-i18n="nav_sources">Data sources</a>
-    </div>
     <div class="lang-switch" id="langSwitch" role="group" aria-label="Language">
       <button type="button" data-lang="en" class="active">EN</button>
       <button type="button" data-lang="hi">हिं</button>
