@@ -11,6 +11,25 @@ const COLORS = {
   grid: 'rgba(255,255,255,0.06)'
 };
 
+// ---------------------------------------------------------------
+// fetch() with a hard timeout. Without this, a slow or hanging
+// upstream endpoint (NASA POWER, Agmarknet, Google Flood Hub) can
+// leave a "checking live feeds…" message on screen indefinitely even
+// after other, faster feeds have already confirmed live — every live
+// feed call in this file should go through here instead of raw
+// fetch() so a stall always resolves to the demo-data fallback within
+// a bounded time.
+// ---------------------------------------------------------------
+async function fetchWithTimeout(url, ms = 7000) {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), ms);
+  try {
+    return await fetch(url, { signal: controller.signal });
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
 function statusColor(s) {
   return s === 'stress' ? COLORS.stress : s === 'watch' ? COLORS.watch : COLORS.normal;
 }
@@ -409,7 +428,7 @@ async function loadLiveSoilMoisture(d) {
   hint.textContent = 'Checking NASA POWER…';
   hint.classList.remove('is-live');
   try {
-    const res = await fetch(`/api/soil-moisture?lat=${d.lat}&lon=${d.lon}`);
+    const res = await fetchWithTimeout(`/api/soil-moisture?lat=${d.lat}&lon=${d.lon}`);
     if (!res.ok) throw new Error(`status ${res.status}`);
     const payload = await res.json();
     hint.textContent = `● Live: ${payload.root_zone_wetness_pct}% root-zone wetness (NASA POWER, ${payload.date})`;
@@ -431,7 +450,7 @@ async function loadLivePrice(d) {
 
   try {
     if (!livePriceCache[d.crop]) {
-      const res = await fetch(`/api/mandi-prices?commodity=${encodeURIComponent(d.crop)}`);
+      const res = await fetchWithTimeout(`/api/mandi-prices?commodity=${encodeURIComponent(d.crop)}`);
       if (!res.ok) throw new Error(`status ${res.status}`);
       livePriceCache[d.crop] = await res.json();
     }
@@ -531,7 +550,7 @@ function renderFloodWidget(payload, isLive) {
 
 async function loadFloodWatch() {
   try {
-    const res = await fetch(
+    const res = await fetchWithTimeout(
       `/api/flood-level?gaugeId=${encodeURIComponent(FLOOD_WATCH.gaugeId)}&lat=${FLOOD_WATCH.lat}&lon=${FLOOD_WATCH.lon}`
     );
     if (!res.ok) throw new Error(`status ${res.status}`);
@@ -618,7 +637,7 @@ async function renderMetricsGrid(d) {
     : `${TREND_ARROW[soilTrend.dir]} ${soilTrend.dir === 'flat' ? 'Expected to stay steady' : soilImproving ? 'Water table trending shallower' : 'Water table trending deeper — worth watching'}`;
   if (isApple) {
     try {
-      const res = await fetch(`/api/soil-moisture?lat=${d.lat}&lon=${d.lon}`);
+      const res = await fetchWithTimeout(`/api/soil-moisture?lat=${d.lat}&lon=${d.lon}`);
       if (!res.ok) throw new Error(`status ${res.status}`);
       const payload = await res.json();
       soilCur.classList.remove('is-loading');
@@ -645,7 +664,7 @@ async function renderMetricsGrid(d) {
   const rainTrend = trendDirection(d.rainfall);
   rainFc.textContent = `${TREND_ARROW[rainTrend.dir]} ${rainTrend.dir === 'flat' ? 'Near the seasonal average, likely to continue' : rainTrend.dir === 'up' ? 'Above recent average — wetter pattern likely to continue short-term' : 'Below recent average — drier pattern likely to continue short-term'}`;
   try {
-    const res = await fetch(`/api/rainfall?lat=${d.lat}&lon=${d.lon}`);
+    const res = await fetchWithTimeout(`/api/rainfall?lat=${d.lat}&lon=${d.lon}`);
     if (!res.ok) throw new Error(`status ${res.status}`);
     const payload = await res.json();
     rainCur.classList.remove('is-loading');
@@ -664,7 +683,7 @@ async function renderMetricsGrid(d) {
   const floodSub = document.getElementById('metricFloodSub');
   const floodFc = document.getElementById('metricFloodForecast');
   try {
-    const res = await fetch(`/api/flood-level?gaugeId=${encodeURIComponent(FLOOD_WATCH.gaugeId)}&lat=${FLOOD_WATCH.lat}&lon=${FLOOD_WATCH.lon}`);
+    const res = await fetchWithTimeout(`/api/flood-level?gaugeId=${encodeURIComponent(FLOOD_WATCH.gaugeId)}&lat=${FLOOD_WATCH.lat}&lon=${FLOOD_WATCH.lon}`);
     if (!res.ok) throw new Error(`status ${res.status}`);
     const payload = await res.json();
     if (!payload.severity) throw new Error('no severity');
@@ -788,7 +807,7 @@ async function renderGlance() {
   const priceFormat = v => `₹${Math.round(v).toLocaleString('en-IN')}/qtl`;
   try {
     if (!livePriceCache['Apple']) {
-      const res = await fetch(`/api/mandi-prices?commodity=Apple`);
+      const res = await fetchWithTimeout(`/api/mandi-prices?commodity=Apple`);
       if (!res.ok) throw new Error(`status ${res.status}`);
       livePriceCache['Apple'] = await res.json();
     }
@@ -878,7 +897,7 @@ function computeForecast(d) {
 async function getCurrentPrice(d) {
   try {
     if (!livePriceCache[d.crop]) {
-      const res = await fetch(`/api/mandi-prices?commodity=${encodeURIComponent(d.crop)}`);
+      const res = await fetchWithTimeout(`/api/mandi-prices?commodity=${encodeURIComponent(d.crop)}`);
       if (!res.ok) throw new Error(`status ${res.status}`);
       livePriceCache[d.crop] = await res.json();
     }
