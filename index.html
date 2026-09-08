@@ -39,6 +39,36 @@
   </div>
 </aside>
 
+<!-- ===================== CROP HEALTH TRIAGE WIDGET ===================== -->
+<!-- Photo-in, triage-out helper for apple growers. Deliberately scoped as
+     triage + point-to-a-human, not a diagnosis or prescription tool — see
+     lib/crop-triage.js for the guardrails and README for the honesty
+     notes on what this can and can't tell you. -->
+<aside id="cropTriageWidget" class="crop-triage-widget" aria-live="polite">
+  <button type="button" id="cropTriageToggle" class="crop-triage-toggle" aria-expanded="false" aria-controls="cropTriageBody">
+    <span class="crop-triage-icon">🌱</span>
+    <span class="crop-triage-title" data-i18n="crop_triage_toggle">Apple health check</span>
+    <span class="crop-triage-chevron">▾</span>
+  </button>
+  <div id="cropTriageBody" class="crop-triage-body">
+    <p class="crop-triage-desc" data-i18n="crop_triage_desc">Upload a photo of an apple showing spots, damage, or discoloration for a quick first read. This is a triage aid, not a diagnosis.</p>
+
+    <label class="crop-triage-field-label" for="cropTriageDistrict" data-i18n="district_select_label">Select a district</label>
+    <select id="cropTriageDistrict" class="district-dropdown"></select>
+
+    <label class="crop-triage-field-label" for="cropTriagePhoto" data-i18n="crop_triage_upload_label">Photo of the apple</label>
+    <input type="file" id="cropTriagePhoto" accept="image/*" capture="environment">
+    <div id="cropTriagePreviewWrap" class="crop-triage-preview-wrap" hidden>
+      <img id="cropTriagePreview" class="crop-triage-preview" alt="">
+    </div>
+
+    <button type="button" id="cropTriageSubmit" class="btn-small crop-triage-submit" data-i18n="crop_triage_submit">Check photo</button>
+
+    <div id="cropTriageResult" class="crop-triage-result" hidden></div>
+  </div>
+</aside>
+
+
 <!-- ===================== NAV ===================== -->
 <nav id="top" class="nav">
   <div class="nav-menu" id="navMenu">
