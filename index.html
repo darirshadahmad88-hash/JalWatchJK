@@ -123,6 +123,39 @@
         </div>
       </div>
 
+      <div class="panel panel-metrics">
+        <div class="panel-head-row">
+          <h4 data-i18n="metrics_title">Current &amp; forecast — key variables</h4>
+          <span class="glance-tag" title="Forecasts here are the same disclosed heuristic used elsewhere on this page — a formula based on seasonal anomalies, not a trained prediction model.">heuristic</span>
+        </div>
+        <div class="metrics-grid" id="metricsGrid">
+          <div class="metric-card" id="metricSoil">
+            <div class="metric-label" id="metricSoilLabel">Soil moisture</div>
+            <div class="metric-current is-loading" id="metricSoilCurrent">—</div>
+            <div class="metric-sub" id="metricSoilSub">Loading…</div>
+            <div class="metric-forecast" id="metricSoilForecast">Loading forecast…</div>
+          </div>
+          <div class="metric-card" id="metricRain">
+            <div class="metric-label" data-i18n="metric_rain">Rainfall</div>
+            <div class="metric-current is-loading" id="metricRainCurrent">—</div>
+            <div class="metric-sub" id="metricRainSub">Loading…</div>
+            <div class="metric-forecast" id="metricRainForecast">Loading forecast…</div>
+          </div>
+          <div class="metric-card" id="metricFlood">
+            <div class="metric-label" data-i18n="metric_flood">Flood situation</div>
+            <div class="metric-current is-loading" id="metricFloodCurrent">—</div>
+            <div class="metric-sub" id="metricFloodSub">Loading…</div>
+            <div class="metric-forecast" id="metricFloodForecast">Loading forecast…</div>
+          </div>
+          <div class="metric-card" id="metricDemand">
+            <div class="metric-label" data-i18n="metric_demand">Demand &amp; supply (mandi)</div>
+            <div class="metric-current is-loading" id="metricDemandCurrent">—</div>
+            <div class="metric-sub" id="metricDemandSub">Loading…</div>
+            <div class="metric-forecast" id="metricDemandForecast">Loading forecast…</div>
+          </div>
+        </div>
+      </div>
+
       <div class="forecast-card" id="forecastPanel">
         <div class="forecast-card-head">
           <div class="forecast-card-heading">
@@ -157,39 +190,6 @@
           </summary>
           <ul class="advisory-list" id="advisoryList"></ul>
         </details>
-      </div>
-
-      <div class="panel panel-metrics">
-        <div class="panel-head-row">
-          <h4 data-i18n="metrics_title">Current &amp; forecast — key variables</h4>
-          <span class="glance-tag" title="Forecasts here are the same disclosed heuristic used elsewhere on this page — a formula based on seasonal anomalies, not a trained prediction model.">heuristic</span>
-        </div>
-        <div class="metrics-grid" id="metricsGrid">
-          <div class="metric-card" id="metricSoil">
-            <div class="metric-label" id="metricSoilLabel">Soil moisture</div>
-            <div class="metric-current is-loading" id="metricSoilCurrent">—</div>
-            <div class="metric-sub" id="metricSoilSub">Loading…</div>
-            <div class="metric-forecast" id="metricSoilForecast">Loading forecast…</div>
-          </div>
-          <div class="metric-card" id="metricRain">
-            <div class="metric-label" data-i18n="metric_rain">Rainfall</div>
-            <div class="metric-current is-loading" id="metricRainCurrent">—</div>
-            <div class="metric-sub" id="metricRainSub">Loading…</div>
-            <div class="metric-forecast" id="metricRainForecast">Loading forecast…</div>
-          </div>
-          <div class="metric-card" id="metricFlood">
-            <div class="metric-label" data-i18n="metric_flood">Flood situation</div>
-            <div class="metric-current is-loading" id="metricFloodCurrent">—</div>
-            <div class="metric-sub" id="metricFloodSub">Loading…</div>
-            <div class="metric-forecast" id="metricFloodForecast">Loading forecast…</div>
-          </div>
-          <div class="metric-card" id="metricDemand">
-            <div class="metric-label" data-i18n="metric_demand">Demand &amp; supply (mandi)</div>
-            <div class="metric-current is-loading" id="metricDemandCurrent">—</div>
-            <div class="metric-sub" id="metricDemandSub">Loading…</div>
-            <div class="metric-forecast" id="metricDemandForecast">Loading forecast…</div>
-          </div>
-        </div>
       </div>
 
       <div class="panel">
