@@ -42,16 +42,43 @@
 <!-- ===================== NAV ===================== -->
 <nav class="nav">
   <a href="#top" class="nav-brand">Jal Watch <span>·</span> <span class="nav-brand-sub">J&amp;K</span></a>
-  <div class="nav-links">
-    <a href="#overview" data-i18n="nav_overview">Overview</a>
-    <a href="#dashboard" data-i18n="nav_dashboard">Dashboard</a>
-    <a href="#method" data-i18n="nav_method">Methodology</a>
-    <a href="#sources" data-i18n="nav_sources">Data sources</a>
+
+  <!-- Compact at-a-glance strip, moved into the nav row itself so it's
+       visible without scrolling. Hidden on narrower viewports (see
+       styles.css) where there isn't room alongside the nav links. -->
+  <div class="nav-glance" id="glance">
+    <div class="nav-glance-item" title="Apple districts, soil moisture">
+      <span class="crop-dot dot-apple"></span>
+      <span class="nav-glance-label" data-i18n="glance_water">Apple districts, soil moisture</span>
+      <span class="nav-glance-value is-loading" id="glanceWater">00.0%</span>
+      <span class="nav-glance-sub" id="glanceWaterSub">Loading…</span>
+    </div>
+    <div class="nav-glance-item" title="Apple mandi price">
+      <span class="crop-dot dot-apple"></span>
+      <span class="nav-glance-label" data-i18n="glance_price">Apple mandi price</span>
+      <span class="nav-glance-value is-loading" id="glancePrice">0000000</span>
+      <span class="nav-glance-sub" id="glancePriceSub">Loading…</span>
+    </div>
+    <div class="nav-glance-item nav-glance-forecast" title="Next-season signal — a disclosed heuristic, not a trained forecasting model">
+      <span class="nav-glance-label" data-i18n="glance_forecast">Next-season signal</span>
+      <span class="glance-tag" title="A transparent heuristic based on soil-moisture and rainfall anomalies for apple districts (groundwater for saffron) — not a trained forecasting model.">heuristic</span>
+      <span class="nav-glance-value is-loading" id="glanceForecast">0000000</span>
+      <span class="nav-glance-sub" id="glanceForecastSub">Loading…</span>
+    </div>
   </div>
-  <div class="lang-switch" id="langSwitch" role="group" aria-label="Language">
-    <button type="button" data-lang="en" class="active">EN</button>
-    <button type="button" data-lang="hi">हिं</button>
-    <button type="button" data-lang="ur">اردو</button>
+
+  <div class="nav-right">
+    <div class="nav-links">
+      <a href="#overview" data-i18n="nav_overview">Overview</a>
+      <a href="#dashboard" data-i18n="nav_dashboard">Dashboard</a>
+      <a href="#method" data-i18n="nav_method">Methodology</a>
+      <a href="#sources" data-i18n="nav_sources">Data sources</a>
+    </div>
+    <div class="lang-switch" id="langSwitch" role="group" aria-label="Language">
+      <button type="button" data-lang="en" class="active">EN</button>
+      <button type="button" data-lang="hi">हिं</button>
+      <button type="button" data-lang="ur">اردو</button>
+    </div>
   </div>
 </nav>
 <div class="lang-note" id="langNote"></div>
@@ -243,26 +270,7 @@
 </section>
 
 
-<!-- ===================== AT-A-GLANCE ===================== -->
-<section class="glance-bar" id="glance">
-  <div class="glance-inner">
-    <div class="glance-card">
-      <div class="glance-label"><span class="crop-dot dot-apple"></span><span data-i18n="glance_water">Apple districts, soil moisture</span></div>
-      <div class="glance-value is-loading" id="glanceWater">00.0%</div>
-      <div class="glance-sub" id="glanceWaterSub">Loading…</div>
-    </div>
-    <div class="glance-card">
-      <div class="glance-label"><span class="crop-dot dot-apple"></span><span data-i18n="glance_price">Apple mandi price</span></div>
-      <div class="glance-value is-loading" id="glancePrice">0000000</div>
-      <div class="glance-sub" id="glancePriceSub">Loading…</div>
-    </div>
-    <div class="glance-card glance-forecast">
-      <div class="glance-label"><span data-i18n="glance_forecast">Next-season signal</span> <span class="glance-tag" title="A transparent heuristic based on soil-moisture and rainfall anomalies for apple districts (groundwater for saffron) — not a trained forecasting model.">heuristic</span></div>
-      <div class="glance-value is-loading" id="glanceForecast">0000000</div>
-      <div class="glance-sub" id="glanceForecastSub">Loading…</div>
-    </div>
-  </div>
-</section>
+
 
 <!-- ===================== HERO ===================== -->
 <header id="top" class="hero">
