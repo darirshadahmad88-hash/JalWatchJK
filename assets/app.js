@@ -111,12 +111,15 @@ function initSlider() {
 function initMap() {
   leafletMap = L.map('mapView', { zoomControl: true, attributionControl: true }).setView([34.0, 74.75], 9);
 
-  // CARTO's dark_all basemap now requires a paid/registered API key for
-  // anonymous use (they locked down basemaps.cartocdn.com in 2024) — this
-  // Esri layer is genuinely free, no key, and keeps the same dark look.
-  L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}', {
-    attribution: 'Tiles &copy; Esri &mdash; Esri, DeLorme, NAVTEQ',
-    maxZoom: 14
+  // Esri's World_Dark_Gray_Base was too flat/plain to read as an
+  // interactive map at a glance — no roads, place names, or visual
+  // texture. World_Street_Map is the same free, keyless Esri service but
+  // with real streets, place labels, and terrain color, so panning/
+  // zooming is obviously "a map" — then we invert/darken it via CSS
+  // (see .map-view .leaflet-tile-pane) to match the site's dark theme.
+  L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}', {
+    attribution: 'Tiles &copy; Esri &mdash; Esri, HERE, Garmin, FAO, NOAA, USGS',
+    maxZoom: 18
   }).addTo(leafletMap);
 
   DISTRICTS.forEach(d => {
