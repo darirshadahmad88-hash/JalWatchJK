@@ -1,218 +1,259 @@
-// server.js
-//
-// Use this if deploying to Render (or any plain Node host) as a Web Service,
-// rather than as a Static Site. It serves the static files AND exposes
-// /api/mandi-prices, so assets/app.js works identically on Netlify or Render.
-//
-// Local run:
-//   npm install
-//   DATA_GOV_IN_API_KEY=your_key node server.js
-//
-// Render setup:
-//   New -> Web Service -> connect this repo
-//   Build command:  npm install
-//   Start command:  node server.js
-//   Add environment variable DATA_GOV_IN_API_KEY in the Render dashboard
+# Jal Watch — Water Stress Early Warning (J&K)
 
-const express = require('express');
-const path = require('path');
+A site pitching a water-stress early-warning tool for Jammu & Kashmir's
+saffron and apple economy: it lines up CGWB groundwater telemetry against
+Agmarknet mandi price history to give officials and farmers a lead-time signal.
 
-const app = express();
-const PORT = process.env.PORT || 3000;
-const DEFAULT_RESOURCE_ID = '9ef84268-d588-465a-a308-a864a43d0070';
+**Which signal for which crop:** saffron corms sit close to the aquifer, so
+Pampore's index still runs on DWLR depth-to-water. Apple orchards in Kashmir
+are largely rain-fed — growers and agronomists report they respond to
+root-zone soil moisture and winter snowpack, not the water table directly —
+so Shopian, Sopore, and Pulwama are scored on a soil-moisture series instead.
+See methodology step 1 on the page.
 
-app.use(express.static(path.join(__dirname)));
+**What's real vs. demo, honestly:**
+- **Mandi prices** — genuinely live once you add a free API key (steps below).
+  A small serverless function fetches the latest reported price per market
+  from the real Agmarknet dataset on data.gov.in.
+- **Groundwater (DWLR)** — still demo data. India-WRIS has no stable public
+  API, so making this live needs a manual browser-devtools capture step
+  (see "Making the data real" below) that only a human can do interactively.
+- **Soil moisture** — the *current reading* shown next to the chart title is
+  now genuinely live, pulled from NASA POWER's `GWETROOT` parameter (root-zone
+  soil wetness, no API key needed — see `/api/soil-moisture` in
+  `server.js`/`netlify/functions/soil-moisture.js`). One honest caveat: this
+  is a MERRA-2 *reanalysis* product (model + satellite + station data
+  blended), not a raw SMAP satellite retrieval — SMAP itself needs a NASA
+  Earthdata login and heavier processing, so POWER is the practical
+  free/live substitute, not literally "SMAP data." The *historical trend
+  line* in the chart is still demo, derived from the demo rainfall series
+  (`soilMoistureFromRainfall` in `assets/data.js`) — same asymmetry as the
+  price chart (live latest value, illustrative history).
+- The historical trend lines in all three series are illustrative either
+  way — the live pieces are the "latest reported price" line under the price
+  chart, the live-soil-moisture badge next to the water/soil chart title,
+  and the live/demo badge next to the stress index.
 
-app.get('/api/mandi-prices', async (req, res) => {
-  const API_KEY = process.env.DATA_GOV_IN_API_KEY;
-  const RESOURCE_ID = process.env.AGMARKNET_RESOURCE_ID || DEFAULT_RESOURCE_ID;
+No build step for the frontend itself — plain HTML/CSS/JS + Chart.js from a
+CDN. The live-price feature needs one small serverless function (Netlify) or
+a tiny Node server (Render) — both are included and already wired up.
 
-  if (!API_KEY) {
-    return res.status(500).json({
-      error: "Missing DATA_GOV_IN_API_KEY. Set it as an environment variable."
-    });
-  }
+## File structure
 
-  const commodity = req.query.commodity || 'Apple';
-  const url = `https://api.data.gov.in/resource/${RESOURCE_ID}` +
-    `?api-key=${encodeURIComponent(API_KEY)}` +
-    `&format=json&limit=200` +
-    `&filters[state]=${encodeURIComponent('Jammu and Kashmir')}` +
-    `&filters[commodity]=${encodeURIComponent(commodity)}`;
+```
+jk-water-watch/
+├── index.html                  # the whole site: hero, overview, dashboard, methodology, sources
+├── assets/
+│   ├── styles.css
+│   ├── data.js                 # demo data (water levels + historical trend) — swap for a real feed later
+│   └── app.js                  # chart rendering + live-price fetch
+├── netlify/functions/
+│   └── mandi-prices.js         # serverless proxy to the Agmarknet API (Netlify path)
+├── server.js                   # Express server exposing the same API (Render/Node path)
+├── package.json                # only needed for the Render/Node path
+├── scripts/
+│   └── ingestion_starter.py    # Python scaffold for the WRIS/groundwater side
+├── netlify.toml                # functions + /api redirect + headers
+├── render.yaml
+└── README.md
+```
 
-  try {
-    const upstream = await fetch(url);
-    if (!upstream.ok) {
-      return res.status(502).json({ error: `Upstream API returned ${upstream.status}` });
-    }
-    const data = await upstream.json();
-    const records = Array.isArray(data.records) ? data.records : [];
+Both deploy paths expose the **same** endpoint — `/api/mandi-prices` — so
+`assets/app.js` doesn't need to know which platform it's on.
 
-    const latestByMarket = {};
-    for (const r of records) {
-      const market = r.market;
-      if (!market) continue;
-      const existing = latestByMarket[market];
-      if (!existing || new Date(r.arrival_date) > new Date(existing.arrival_date)) {
-        latestByMarket[market] = r;
-      }
-    }
+## Run it locally
 
-    res.set('Cache-Control', 'public, max-age=1800');
-    res.json({
-      commodity,
-      fetched_at: new Date().toISOString(),
-      markets: Object.values(latestByMarket)
-    });
-  } catch (err) {
-    res.status(502).json({ error: String(err) });
-  }
-});
+No build tools needed. Either:
 
-// ---------------------------------------------------------------
-// Live flood status for the Jhelum near Ram Munshi Bagh, Srinagar.
-// Tries the "official" CWC gauge via Google Flood Hub first (needs a
-// waitlisted GOOGLE_FLOOD_API_KEY), then falls back to Open-Meteo's
-// keyless GloFAS river-discharge feed — which is genuinely live right
-// now, no key or waitlist needed. Only if BOTH fail does the frontend
-// fall back to the labelled demo reading in assets/data.js. See
-// lib/flood-sources.js for the honesty notes on each source.
-// ---------------------------------------------------------------
-const { fetchGoogleFloodHub, fetchOpenMeteoFlood } = require('./lib/flood-sources');
+```bash
+# Python's built-in server
+python3 -m http.server 8000
+# then open http://localhost:8000
+```
 
-app.get('/api/flood-level', async (req, res) => {
-  const gaugeId = req.query.gaugeId || 'CWC_005-JHELUM';
-  const lat = parseFloat(req.query.lat) || 34.0631;
-  const lon = parseFloat(req.query.lon) || 74.8344;
-  const API_KEY = process.env.GOOGLE_FLOOD_API_KEY;
+or just open `index.html` directly in a browser (Chart.js loads from a CDN,
+so you need internet access either way).
 
-  if (API_KEY) {
-    try {
-      const payload = await fetchGoogleFloodHub(gaugeId, API_KEY);
-      if (payload) {
-        res.set('Cache-Control', 'public, max-age=900'); // 15 min
-        return res.json(payload);
-      }
-    } catch (err) { /* fall through to the keyless GloFAS feed below */ }
-  }
+## Get a data.gov.in API key first (2 minutes)
 
-  try {
-    const payload = await fetchOpenMeteoFlood(lat, lon);
-    res.set('Cache-Control', 'public, max-age=3600'); // GloFAS updates ~daily
-    return res.json(payload);
-  } catch (err) {
-    res.status(502).json({ error: String(err) });
-  }
-});
+The live-price feature needs a free key:
+1. Register at [data.gov.in/user/register](https://data.gov.in/user/register)
+2. Once logged in, go to "My Account" → "API Keys" and copy your key
+3. You'll paste this into an environment variable in whichever platform you deploy to — never commit it into the code
 
-app.listen(PORT, () => console.log(`Jal Watch running on port ${PORT}`));
+Without this key set, the site still works fine — the badge just shows
+"Demo price data" and the charts run on the bundled sample values.
 
-// ---------------------------------------------------------------
-// Live root-zone soil moisture, for apple districts (Shopian, Sopore,
-// Pulwama). Source: NASA POWER's GWETROOT parameter — root-zone soil
-// wetness derived from NASA's GMAO MERRA-2 reanalysis model. This is a
-// genuinely free, keyless, real-time NASA data product; it is NOT raw
-// SMAP satellite retrieval (SMAP itself requires an Earthdata login and
-// heavier processing), so we label it accurately rather than call it
-// "SMAP" in the UI. Docs: https://power.larc.nasa.gov/docs/services/api/
-// ---------------------------------------------------------------
-app.get('/api/soil-moisture', async (req, res) => {
-  const lat = parseFloat(req.query.lat);
-  const lon = parseFloat(req.query.lon);
-  if (Number.isNaN(lat) || Number.isNaN(lon)) {
-    return res.status(400).json({ error: 'lat and lon query params are required' });
-  }
+## Deploy to Netlify (drag-and-drop still works, plus the live function)
 
-  // Ask for a ~12-day trailing window — MERRA-2 reanalysis typically lags
-  // a few days behind real time, so the most recent single day can be
-  // missing (-999 fill value); take the latest valid day in the window.
-  const end = new Date();
-  const start = new Date(end);
-  start.setDate(start.getDate() - 12);
-  const fmt = d => d.toISOString().slice(0, 10).replace(/-/g, '');
+**Drag-and-drop:**
+1. Go to [app.netlify.com/drop](https://app.netlify.com/drop) and drag the
+   `jk-water-watch` folder onto the page — you get a live URL immediately
+2. To enable live prices: Site settings → Environment variables → add
+   `DATA_GOV_IN_API_KEY` with your key → trigger a redeploy (drag the folder
+   again, or use "Deploys" → "Trigger deploy")
 
-  const url = `https://power.larc.nasa.gov/api/temporal/daily/point` +
-    `?parameters=GWETROOT&community=AG` +
-    `&longitude=${lon}&latitude=${lat}` +
-    `&start=${fmt(start)}&end=${fmt(end)}&format=JSON`;
+**From a Git repo (recommended once you want the function working smoothly):**
+1. Push this folder to a GitHub repo
+2. In Netlify: "Add new site" → "Import an existing project" → pick the repo
+3. Build command: leave blank. Publish directory: `.` — `netlify.toml`
+   already points Netlify at the `netlify/functions` folder
+4. Site settings → Environment variables → add `DATA_GOV_IN_API_KEY`
+5. Deploy. The badge on the dashboard should flip to "● Live from Agmarknet"
+   for markets the API returns data for
 
-  try {
-    const upstream = await fetch(url);
-    if (!upstream.ok) {
-      return res.status(502).json({ error: `Upstream API returned ${upstream.status}` });
-    }
-    const data = await upstream.json();
-    const series = (data && data.properties && data.properties.parameter && data.properties.parameter.GWETROOT) || {};
-    const entries = Object.entries(series)
-      .filter(([, v]) => typeof v === 'number' && v > -900) // NASA POWER fills gaps with -999
-      .sort((a, b) => a[0].localeCompare(b[0]));
+## Deploy to Render
 
-    if (!entries.length) {
-      return res.status(502).json({ error: 'No recent GWETROOT data returned for this point' });
-    }
+The static-site path (no live prices) works exactly as before: New → Static
+Site → publish directory `.`.
 
-    const [dateStr, wetnessFraction] = entries[entries.length - 1];
-    res.set('Cache-Control', 'public, max-age=21600'); // 6h — updates roughly daily upstream
-    res.json({
-      source: 'NASA POWER (GWETROOT, root-zone soil wetness, MERRA-2 reanalysis)',
-      date: `${dateStr.slice(0, 4)}-${dateStr.slice(4, 6)}-${dateStr.slice(6, 8)}`,
-      root_zone_wetness_fraction: wetnessFraction,
-      root_zone_wetness_pct: +(wetnessFraction * 100).toFixed(1)
-    });
-  } catch (err) {
-    res.status(502).json({ error: String(err) });
-  }
-});
+**For the live-price version, deploy as a Web Service instead** (Render's
+static sites can't run server code):
+1. Push this folder to a GitHub repo
+2. In Render: "New" → "Web Service" → connect the repo
+3. Build command: `npm install`. Start command: `node server.js`
+4. Environment → add `DATA_GOV_IN_API_KEY`
+5. Deploy — `server.js` serves the static site *and* `/api/mandi-prices`
 
-// ---------------------------------------------------------------
-// Live rainfall, for the signal-links dashboard. Same NASA POWER point
-// API as /api/soil-moisture, just a different parameter (PRECTOTCORR —
-// bias-corrected precipitation, mm/day). Keyless, no setup needed.
-// ---------------------------------------------------------------
-app.get('/api/rainfall', async (req, res) => {
-  const lat = parseFloat(req.query.lat);
-  const lon = parseFloat(req.query.lon);
-  if (Number.isNaN(lat) || Number.isNaN(lon)) {
-    return res.status(400).json({ error: 'lat and lon query params are required' });
-  }
+Either platform redeploys automatically on every push once connected.
 
-  const end = new Date();
-  const start = new Date(end);
-  start.setDate(start.getDate() - 12);
-  const fmt = d => d.toISOString().slice(0, 10).replace(/-/g, '');
+## Flood Watch widget (top-right corner)
 
-  const url = `https://power.larc.nasa.gov/api/temporal/daily/point` +
-    `?parameters=PRECTOTCORR&community=AG` +
-    `&longitude=${lon}&latitude=${lat}` +
-    `&start=${fmt(start)}&end=${fmt(end)}&format=JSON`;
+A small floating widget, separate from the crop-water-stress dashboard,
+tracks flood risk on the Jhelum at Ram Munshi Bagh (Srinagar) — the
+opposite signal from the rest of the site (too much water, not too
+little), so it's kept as its own module rather than folded into the
+`DISTRICTS` stress score.
 
-  try {
-    const upstream = await fetch(url);
-    if (!upstream.ok) {
-      return res.status(502).json({ error: `Upstream API returned ${upstream.status}` });
-    }
-    const data = await upstream.json();
-    const series = (data && data.properties && data.properties.parameter && data.properties.parameter.PRECTOTCORR) || {};
-    const entries = Object.entries(series)
-      .filter(([, v]) => typeof v === 'number' && v > -900)
-      .sort((a, b) => a[0].localeCompare(b[0]));
+- **What it shows:** a Normal / Watch / Alert / Danger status pill
+  (mapped from the gauge's flood severity), a rising/falling/steady
+  trend, and the gauge's warning/danger/extreme threshold levels for
+  context.
+- **Source:** Google Flood Hub's Flood Forecasting API
+  (`floodforecasting.googleapis.com`), which republishes CWC's own
+  gauge for this station (gauge id `CWC_005-JHELUM`). It's free and
+  public, but currently requires joining a waitlist to get an API key
+  — see [developers.google.com/flood-forecasting](https://developers.google.com/flood-forecasting).
+- **Without a key set:** the widget shows a clearly labelled "Demo
+  flood data" reading (a calm, non-alarming Normal status) rather than
+  guessing — same honesty pattern as the rest of this project.
+- **To make it live:** once approved, set `GOOGLE_FLOOD_API_KEY` as an
+  environment variable (same place as `DATA_GOV_IN_API_KEY`) on
+  Netlify or Render and redeploy. The endpoint is `/api/flood-level`,
+  wired up identically on both platforms
+  (`netlify/functions/flood-level.js` / the route in `server.js`).
+- **What's deliberately not included:** live NH44 road/traffic status.
+  There's no public dataset or API for this — closures are announced
+  via J&K Traffic Police's social media posts, which aren't reliably
+  scrapeable or structured. Rather than fake a status, the widget
+  leaves this out; if you want it later, the honest options are a
+  manually-updated field or a link out to the traffic police's account.
 
-    if (!entries.length) {
-      return res.status(502).json({ error: 'No recent PRECTOTCORR data returned for this point' });
-    }
+## Crop health triage widget (bottom-left corner)
 
-    const [dateStr, mmPerDay] = entries[entries.length - 1];
-    const last7 = entries.slice(-7).map(([, v]) => v);
-    const weeklyTotal = +last7.reduce((a, b) => a + b, 0).toFixed(1);
+A small floating widget where a grower uploads a photo of an apple and
+gets a quick first-look triage. **Scoped deliberately as triage +
+point-to-a-human, not diagnosis or prescription:**
 
-    res.set('Cache-Control', 'public, max-age=21600');
-    res.json({
-      source: 'NASA POWER (PRECTOTCORR, bias-corrected precipitation)',
-      date: `${dateStr.slice(0, 4)}-${dateStr.slice(4, 6)}-${dateStr.slice(6, 8)}`,
-      mm_per_day: +mmPerDay.toFixed(1),
-      mm_last_7_days: weeklyTotal
-    });
-  } catch (err) {
-    res.status(502).json({ error: String(err) });
-  }
-});
+- **What it does:** sends the photo to a vision-capable Claude model
+  (`lib/crop-triage.js`) with a system prompt that returns, as strict
+  JSON: an overall confidence (low/medium/high), up to 3 plausible
+  plain-language issue names, up to 4 general cultural-practice
+  suggestions, and a one-line caveat if the photo is ambiguous.
+- **What it will never do, by design:** name a specific pesticide,
+  fungicide, or fertilizer product/active ingredient, or give a
+  dosage/mixing ratio/application timing. That's a real agronomic
+  recommendation — getting it wrong from a single fruit photo could
+  cause real crop or health harm, so the system prompt hard-bans it
+  and the UI always appends a static pointer to a real Krishi Vigyan
+  Kendra (KVK) / the Kisan Call Centre (1800-180-1551) instead.
+- **The water-stress line is not the model's guess.** When the result
+  card mentions "this district is currently in the 'stress'/'watch'
+  band," that's read directly from this project's own `DISTRICTS`
+  index — the same deterministic score driving the main dashboard —
+  never generated by the vision model.
+- **Source:** the Anthropic Messages API
+  (`api.anthropic.com/v1/messages`), called server-side so the key
+  never reaches the browser.
+- **Without a key set:** returns a clearly labelled demo response
+  (`mode: "demo"`) rather than silently pretending to have analyzed
+  the photo — same honesty pattern as every other live/demo feed on
+  this page.
+- **To make it live:** set `ANTHROPIC_API_KEY` (get one at
+  [console.anthropic.com](https://console.anthropic.com)) as an
+  environment variable on Netlify or Render and redeploy. Optionally
+  set `ANTHROPIC_MODEL` to override the default model. The endpoint is
+  `/api/crop-triage`, wired up on both platforms
+  (`netlify/functions/crop-triage.js` / the route in `server.js`).
+- **Real limitation worth stating up front:** a single fruit photo
+  often isn't enough to tell fungal disease, pest damage, and nutrient
+  deficiency apart — that's exactly why this is framed as low-stakes
+  triage with a human pointer at the end, not a standalone answer.
+
+## Dashboard features
+
+- **Map view** — a live Leaflet map (dark CARTO tiles, no API key needed)
+  with a marker per district; click a marker to select that district.
+- **Search box** — filters the district list by name or crop as you type.
+- **Compare mode** — check "Compare with another district" and pick a
+  second one; both charts overlay a dashed second line for it.
+- **Date-range slider** — drag either handle to zoom the charts into a
+  sub-range of the 36-month history.
+- **Export CSV** — downloads the currently visible range (and both
+  districts, if compare mode is on) as a CSV file.
+
+All five read from the same `DISTRICTS` array in `assets/data.js`, so once
+you swap in real groundwater data, every feature above works on it
+automatically — no extra wiring needed.
+
+## Making the rest of the data real
+
+**Mandi prices are wired up already** (see above) — once your API key is
+set, that half is live.
+
+**Groundwater is still the piece to finish:**
+1. India-WRIS doesn't have a stable, documented public API. The DWLR data
+   is reachable because the portal's own frontend calls internal endpoints
+   — open your browser's devtools Network tab while selecting Jammu &
+   Kashmir → a district → a DWLR station on indiawris.gov.in, capture the
+   actual request, and replicate it with Python's `requests` (see
+   `scripts/ingestion_starter.py` for the shape this should take). Several
+   open-source "WRIS extractor" scrapers on GitHub show working examples of
+   this request sequence.
+2. Once you can pull real readings, either (a) add a second API route
+   (`/api/groundwater`, same pattern as `mandi-prices.js`) if you want it
+   live on page load, or (b) run a scheduled script that regenerates
+   `assets/data.js` with real values daily — simpler, and often good enough
+   for a demo. Keep the same object shape so `assets/app.js` doesn't need
+   to change.
+
+**Soil moisture — the current reading is done; the historical chart is what's left:**
+1. `/api/soil-moisture` (in `server.js` and `netlify/functions/soil-moisture.js`)
+   already pulls the live current reading from NASA POWER's `GWETROOT`
+   parameter — no API key needed, nothing to set up. `loadLiveSoilMoisture()`
+   in `assets/app.js` calls it whenever you select an apple district and
+   shows the result next to the chart title.
+2. What's still demo: the *historical trend line* in the chart itself, which
+   comes from `soilMoistureFromRainfall(...)` in `assets/data.js`. NASA
+   POWER's daily/monthly point API can backfill this too (it has data back
+   to 1981) — pull a year or two of `GWETROOT` per district and replace the
+   `soilMoisture` array with real values, same shape (percent, one value per
+   month), so `assets/app.js` doesn't need to change.
+3. If you want true SMAP satellite retrievals instead of the MERRA-2
+   reanalysis POWER serves, that means a NASA Earthdata login and heavier
+   processing (or ISRO Bhuvan's soil-moisture layer as an India-specific
+   alternative) — POWER was chosen here specifically because it needs
+   neither.
+
+**One honesty note on the resource ID:** the Agmarknet resource id baked
+into `mandi-prices.js` and `server.js` is the one commonly published for
+this dataset, but data.gov.in occasionally reissues resource ids — if the
+live badge won't go green, the first thing to check is whether that id
+still matches the current one listed on the dataset's page on data.gov.in.
+
+## Honesty note for judges
+
+The site is careful to frame this as a **decision-support signal**, not a
+price prediction model — the historical sample size (a handful of comparable
+seasons per district) doesn't support a real forecasting claim. If asked,
+that's the correct answer to give.
