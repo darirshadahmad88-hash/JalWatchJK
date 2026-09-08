@@ -24,6 +24,11 @@
   to = "/.netlify/functions/rainfall"
   status = 200
 
+[[redirects]]
+  from = "/api/farmer-brief"
+  to = "/.netlify/functions/farmer-brief"
+  status = 200
+
 [[headers]]
   for = "/*"
   [headers.values]
