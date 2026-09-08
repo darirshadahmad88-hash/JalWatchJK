@@ -57,6 +57,174 @@
 </nav>
 <div class="lang-note" id="langNote"></div>
 
+<!-- ===================== DASHBOARD ===================== -->
+<section id="dashboard" class="section section-dark">
+  <div class="section-head">
+    <div class="kicker" data-i18n="dashboard_kicker">Dashboard</div>
+    <h2 data-i18n="dashboard_h2">District water stress dashboard</h2>
+    <p class="section-sub" id="dashSampleNote">Checking live feeds…</p>
+  </div>
+
+  <div class="dash-layout">
+    <div class="dash-sidebar">
+      <div class="dash-sidebar-label" data-i18n="district_select_label">Select a district</div>
+      <select id="districtDropdown" class="district-dropdown"></select>
+
+      <div class="dash-sidebar-label dash-sidebar-label-secondary">Or browse the list</div>
+      <input type="text" id="districtSearch" class="search-input" placeholder="Search district or crop…" data-i18n-placeholder="search_placeholder" autocomplete="off">
+      <div id="districtList"></div>
+
+      <div class="compare-block">
+        <label class="compare-label">
+          <input type="checkbox" id="compareToggle">
+          <span data-i18n="compare_label">Compare with another district</span>
+        </label>
+        <select id="compareSelect" class="compare-select" disabled></select>
+      </div>
+    </div>
+
+    <div class="dash-main">
+      <div class="dash-heading-row">
+        <div>
+          <div class="kicker" id="cropLabel">SAFFRON</div>
+          <h3 id="districtName">Pampore, Anantnag</h3>
+        </div>
+        <div class="pill-group">
+          <div class="status-pill" id="statusPill">Water stress index: 1.8</div>
+          <div class="live-badge" id="liveBadge">Demo price data</div>
+        </div>
+      </div>
+
+      <div class="risk-gauge" id="riskGauge">
+        <div class="gauge-track">
+          <span class="gauge-seg gauge-seg-normal"></span>
+          <span class="gauge-seg gauge-seg-watch"></span>
+          <span class="gauge-seg gauge-seg-stress"></span>
+          <span class="gauge-seg gauge-seg-severe"></span>
+          <div class="gauge-marker" id="gaugeMarker"></div>
+        </div>
+        <div class="gauge-labels">
+          <span class="gauge-seg-label"></span>
+          <span class="gauge-seg-label"></span>
+          <span class="gauge-seg-label"></span>
+          <span class="gauge-seg-label"></span>
+        </div>
+      </div>
+
+      <div class="plain-insight" id="plainInsight">
+        <div class="plain-insight-icon" id="plainInsightIcon">🟢</div>
+        <div class="plain-insight-body">
+          <div class="plain-insight-title" id="plainInsightTitle">What this means for you</div>
+          <p class="plain-insight-text" id="plainInsightBody">Loading…</p>
+          <div class="plain-insight-actions">
+            <button type="button" id="plainInsightListen" class="btn-small">🔊 Listen</button>
+            <a href="#" target="_blank" rel="noopener" id="plainInsightShare" class="btn-small btn-share">📤 Share on WhatsApp</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel panel-metrics">
+        <div class="panel-head-row">
+          <h4 data-i18n="metrics_title">Current &amp; forecast — key variables</h4>
+          <span class="glance-tag" title="Forecasts here are the same disclosed heuristic used elsewhere on this page — a formula based on seasonal anomalies, not a trained prediction model.">heuristic</span>
+        </div>
+        <div class="metrics-grid" id="metricsGrid">
+          <div class="metric-card" id="metricSoil">
+            <div class="metric-label" id="metricSoilLabel">Soil moisture</div>
+            <div class="metric-current is-loading" id="metricSoilCurrent">—</div>
+            <div class="metric-sub" id="metricSoilSub">Loading…</div>
+            <div class="metric-forecast" id="metricSoilForecast">Loading forecast…</div>
+          </div>
+          <div class="metric-card" id="metricRain">
+            <div class="metric-label" data-i18n="metric_rain">Rainfall</div>
+            <div class="metric-current is-loading" id="metricRainCurrent">—</div>
+            <div class="metric-sub" id="metricRainSub">Loading…</div>
+            <div class="metric-forecast" id="metricRainForecast">Loading forecast…</div>
+          </div>
+          <div class="metric-card" id="metricFlood">
+            <div class="metric-label" data-i18n="metric_flood">Flood situation</div>
+            <div class="metric-current is-loading" id="metricFloodCurrent">—</div>
+            <div class="metric-sub" id="metricFloodSub">Loading…</div>
+            <div class="metric-forecast" id="metricFloodForecast">Loading forecast…</div>
+          </div>
+          <div class="metric-card" id="metricDemand">
+            <div class="metric-label" data-i18n="metric_demand">Demand &amp; supply (mandi)</div>
+            <div class="metric-current is-loading" id="metricDemandCurrent">—</div>
+            <div class="metric-sub" id="metricDemandSub">Loading…</div>
+            <div class="metric-forecast" id="metricDemandForecast">Loading forecast…</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-head-row">
+          <h4>District map</h4>
+          <span class="panel-hint">Click a marker to select it</span>
+        </div>
+        <div id="mapView" class="map-view"></div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-head-row">
+          <h4>Time range</h4>
+          <span class="range-readout" id="rangeReadout"></span>
+        </div>
+        <div class="dual-slider">
+          <div class="dual-slider-track"></div>
+          <div class="dual-slider-fill" id="sliderFill"></div>
+          <input type="range" id="rangeStart" min="0" max="35" value="0" step="1">
+          <input type="range" id="rangeEnd" min="0" max="35" value="35" step="1">
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-head-row">
+          <h4 id="waterChartTitle">GROUNDWATER LEVEL VS. RAINFALL</h4>
+          <span class="panel-hint" id="waterChartHint"></span>
+        </div>
+        <div class="chart-wrap"><canvas id="waterChart"></canvas></div>
+        <p class="live-price" id="waterChartNote"></p>
+      </div>
+
+      <div class="panel">
+        <h4>Mandi arrivals &amp; modal price</h4>
+        <div class="chart-wrap"><canvas id="priceChart"></canvas></div>
+        <p class="live-price" id="livePriceLine"></p>
+      </div>
+
+      <div class="panel panel-forecast">
+        <div class="panel-head-row">
+          <h4>Next-season forecast &amp; grower advisory</h4>
+          <span class="glance-tag" id="fcTag" title="A transparent heuristic combining this district's own signal (soil moisture or groundwater), rainfall anomaly, and arrivals trend — not a trained forecasting model. Treat as one input alongside local agriculture-extension advice.">heuristic</span>
+        </div>
+        <div class="forecast-row">
+          <div class="forecast-stat">
+            <div class="forecast-stat-label">Current price</div>
+            <div class="forecast-stat-value is-loading" id="fcCurrentPrice">0000000</div>
+            <div class="forecast-stat-sub" id="fcCurrentSub"></div>
+          </div>
+          <div class="forecast-arrow">→</div>
+          <div class="forecast-stat">
+            <div class="forecast-stat-label">Forecast, next season</div>
+            <div class="forecast-stat-value is-loading" id="fcForecastPrice">0000000</div>
+            <div class="forecast-stat-sub" id="fcPctSub"></div>
+          </div>
+        </div>
+        <p class="forecast-basis" id="fcBasis"></p>
+        <h5 class="advisory-heading">Advisory for growers</h5>
+        <ul class="advisory-list" id="advisoryList"></ul>
+      </div>
+
+      <div class="panel-actions">
+        <button id="exportCsvBtn" class="btn-small" data-i18n="export_csv">Export CSV</button>
+      </div>
+
+      <p class="insight" id="insightText"></p>
+    </div>
+  </div>
+</section>
+
+
 <!-- ===================== AT-A-GLANCE ===================== -->
 <section class="glance-bar" id="glance">
   <div class="glance-inner">
@@ -146,137 +314,6 @@
       <p>We compute a seasonal <span class="glossary" data-term="zscore" tabindex="0">z-score<sup>?</sup></span> for water level per district, adjusted for rainfall, and
       show its historical relationship to arrivals. It's a decision-support signal for officials
       and growers — deliberately not framed as a price forecast.</p>
-    </div>
-  </div>
-</section>
-
-<!-- ===================== DASHBOARD ===================== -->
-<section id="dashboard" class="section section-dark">
-  <div class="section-head">
-    <div class="kicker" data-i18n="dashboard_kicker">Dashboard</div>
-    <h2 data-i18n="dashboard_h2">District water stress dashboard</h2>
-    <p class="section-sub" id="dashSampleNote">Checking live feeds…</p>
-  </div>
-
-  <div class="dash-layout">
-    <div class="dash-sidebar">
-      <div class="dash-sidebar-label">Districts on the DWLR network</div>
-      <input type="text" id="districtSearch" class="search-input" placeholder="Search district or crop…" data-i18n-placeholder="search_placeholder" autocomplete="off">
-      <div id="districtList"></div>
-
-      <div class="compare-block">
-        <label class="compare-label">
-          <input type="checkbox" id="compareToggle">
-          <span data-i18n="compare_label">Compare with another district</span>
-        </label>
-        <select id="compareSelect" class="compare-select" disabled></select>
-      </div>
-    </div>
-
-    <div class="dash-main">
-      <div class="dash-heading-row">
-        <div>
-          <div class="kicker" id="cropLabel">SAFFRON</div>
-          <h3 id="districtName">Pampore, Anantnag</h3>
-        </div>
-        <div class="pill-group">
-          <div class="status-pill" id="statusPill">Water stress index: 1.8</div>
-          <div class="live-badge" id="liveBadge">Demo price data</div>
-        </div>
-      </div>
-
-      <div class="risk-gauge" id="riskGauge">
-        <div class="gauge-track">
-          <span class="gauge-seg gauge-seg-normal"></span>
-          <span class="gauge-seg gauge-seg-watch"></span>
-          <span class="gauge-seg gauge-seg-stress"></span>
-          <span class="gauge-seg gauge-seg-severe"></span>
-          <div class="gauge-marker" id="gaugeMarker"></div>
-        </div>
-        <div class="gauge-labels">
-          <span class="gauge-seg-label"></span>
-          <span class="gauge-seg-label"></span>
-          <span class="gauge-seg-label"></span>
-          <span class="gauge-seg-label"></span>
-        </div>
-      </div>
-
-      <div class="plain-insight" id="plainInsight">
-        <div class="plain-insight-icon" id="plainInsightIcon">🟢</div>
-        <div class="plain-insight-body">
-          <div class="plain-insight-title" id="plainInsightTitle">What this means for you</div>
-          <p class="plain-insight-text" id="plainInsightBody">Loading…</p>
-          <div class="plain-insight-actions">
-            <button type="button" id="plainInsightListen" class="btn-small">🔊 Listen</button>
-            <a href="#" target="_blank" rel="noopener" id="plainInsightShare" class="btn-small btn-share">📤 Share on WhatsApp</a>
-          </div>
-        </div>
-      </div>
-
-      <div class="panel">
-        <div class="panel-head-row">
-          <h4>District map</h4>
-          <span class="panel-hint">Click a marker to select it</span>
-        </div>
-        <div id="mapView" class="map-view"></div>
-      </div>
-
-      <div class="panel">
-        <div class="panel-head-row">
-          <h4>Time range</h4>
-          <span class="range-readout" id="rangeReadout"></span>
-        </div>
-        <div class="dual-slider">
-          <div class="dual-slider-track"></div>
-          <div class="dual-slider-fill" id="sliderFill"></div>
-          <input type="range" id="rangeStart" min="0" max="35" value="0" step="1">
-          <input type="range" id="rangeEnd" min="0" max="35" value="35" step="1">
-        </div>
-      </div>
-
-      <div class="panel">
-        <div class="panel-head-row">
-          <h4 id="waterChartTitle">GROUNDWATER LEVEL VS. RAINFALL</h4>
-          <span class="panel-hint" id="waterChartHint"></span>
-        </div>
-        <div class="chart-wrap"><canvas id="waterChart"></canvas></div>
-        <p class="live-price" id="waterChartNote"></p>
-      </div>
-
-      <div class="panel">
-        <h4>Mandi arrivals &amp; modal price</h4>
-        <div class="chart-wrap"><canvas id="priceChart"></canvas></div>
-        <p class="live-price" id="livePriceLine"></p>
-      </div>
-
-      <div class="panel panel-forecast">
-        <div class="panel-head-row">
-          <h4>Next-season forecast &amp; grower advisory</h4>
-          <span class="glance-tag" id="fcTag" title="A transparent heuristic combining this district's own signal (soil moisture or groundwater), rainfall anomaly, and arrivals trend — not a trained forecasting model. Treat as one input alongside local agriculture-extension advice.">heuristic</span>
-        </div>
-        <div class="forecast-row">
-          <div class="forecast-stat">
-            <div class="forecast-stat-label">Current price</div>
-            <div class="forecast-stat-value is-loading" id="fcCurrentPrice">0000000</div>
-            <div class="forecast-stat-sub" id="fcCurrentSub"></div>
-          </div>
-          <div class="forecast-arrow">→</div>
-          <div class="forecast-stat">
-            <div class="forecast-stat-label">Forecast, next season</div>
-            <div class="forecast-stat-value is-loading" id="fcForecastPrice">0000000</div>
-            <div class="forecast-stat-sub" id="fcPctSub"></div>
-          </div>
-        </div>
-        <p class="forecast-basis" id="fcBasis"></p>
-        <h5 class="advisory-heading">Advisory for growers</h5>
-        <ul class="advisory-list" id="advisoryList"></ul>
-      </div>
-
-      <div class="panel-actions">
-        <button id="exportCsvBtn" class="btn-small" data-i18n="export_csv">Export CSV</button>
-      </div>
-
-      <p class="insight" id="insightText"></p>
     </div>
   </div>
 </section>
