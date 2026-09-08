@@ -70,16 +70,9 @@
       <div class="dash-sidebar-label" data-i18n="district_select_label">Select a district</div>
       <select id="districtDropdown" class="district-dropdown"></select>
 
-      <div class="dash-sidebar-label dash-sidebar-label-secondary">Or browse the list</div>
-      <input type="text" id="districtSearch" class="search-input" placeholder="Search district or crop…" data-i18n-placeholder="search_placeholder" autocomplete="off">
-      <div id="districtList"></div>
-
-      <div class="compare-block">
-        <label class="compare-label">
-          <input type="checkbox" id="compareToggle">
-          <span data-i18n="compare_label">Compare with another district</span>
-        </label>
-        <select id="compareSelect" class="compare-select" disabled></select>
+      <div class="sidebar-map-wrap">
+        <div class="sidebar-map-label">District map<span class="panel-hint">Click a marker to select it</span></div>
+        <div id="mapView" class="map-view sidebar-map-view"></div>
       </div>
     </div>
 
@@ -190,14 +183,6 @@
           </summary>
           <ul class="advisory-list" id="advisoryList"></ul>
         </details>
-      </div>
-
-      <div class="panel">
-        <div class="panel-head-row">
-          <h4>District map</h4>
-          <span class="panel-hint">Click a marker to select it</span>
-        </div>
-        <div id="mapView" class="map-view"></div>
       </div>
 
       <div class="panel">
