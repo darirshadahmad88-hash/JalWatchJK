@@ -564,6 +564,22 @@ function initFloodWidget() {
   // Re-check periodically so the badge/severity stay current on a page
   // left open — matches the API's own 15-min cache window.
   setInterval(loadFloodWatch, 15 * 60 * 1000);
+
+  // Keep this fixed widget clear of the sticky nav (whose height varies
+  // now that it can carry the at-a-glance strip). Below the mobile
+  // breakpoint the widget docks to the bottom instead (see CSS), so we
+  // leave that positioning alone.
+  const positionFloodWidget = () => {
+    const nav = document.querySelector('.nav');
+    if (!nav) return;
+    if (window.matchMedia('(max-width: 640px)').matches) {
+      widget.style.top = '';
+    } else {
+      widget.style.top = (nav.getBoundingClientRect().height + 12) + 'px';
+    }
+  };
+  positionFloodWidget();
+  window.addEventListener('resize', positionFloodWidget);
 }
 
 // ---------------------------------------------------------------
@@ -812,7 +828,7 @@ async function renderGlance() {
   fEl.classList.remove('is-loading');
   const dir = pctChange > 0.01 ? 'up' : pctChange < -0.01 ? 'down' : 'flat';
   animateValue(fEl, forecastPrice, { format: priceFormat });
-  fEl.className = 'glance-value' + (dir === 'up' ? ' up' : dir === 'down' ? ' down' : '');
+  fEl.className = 'nav-glance-value' + (dir === 'up' ? ' up' : dir === 'down' ? ' down' : '');
 
   const pctLabel = `${pctChange >= 0 ? '+' : ''}${(pctChange * 100).toFixed(1)}%`;
   const reason = dir === 'up'
