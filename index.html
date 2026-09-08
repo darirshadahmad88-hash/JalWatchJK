@@ -6,7 +6,7 @@
 <title>Jal Watch — Water Stress Early Warning for J&K Agriculture</title>
 <meta name="description" content="Correlating CGWB groundwater telemetry with Agmarknet mandi prices to give early warning of agricultural stress in Jammu & Kashmir.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&family=Noto+Sans+Devanagari:wght@400;500;600&family=Noto+Nastaliq+Urdu:wght@400;600&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js" defer></script>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js" defer></script>
@@ -43,29 +43,35 @@
 <nav class="nav">
   <a href="#top" class="nav-brand">Jal Watch <span>·</span> <span class="nav-brand-sub">J&amp;K</span></a>
   <div class="nav-links">
-    <a href="#overview">Overview</a>
-    <a href="#dashboard">Dashboard</a>
-    <a href="#link">Signal links</a>
-    <a href="#method">Methodology</a>
-    <a href="#sources">Data sources</a>
+    <a href="#overview" data-i18n="nav_overview">Overview</a>
+    <a href="#dashboard" data-i18n="nav_dashboard">Dashboard</a>
+    <a href="#link" data-i18n="nav_links">Signal links</a>
+    <a href="#method" data-i18n="nav_method">Methodology</a>
+    <a href="#sources" data-i18n="nav_sources">Data sources</a>
+  </div>
+  <div class="lang-switch" id="langSwitch" role="group" aria-label="Language">
+    <button type="button" data-lang="en" class="active">EN</button>
+    <button type="button" data-lang="hi">हिं</button>
+    <button type="button" data-lang="ur">اردو</button>
   </div>
 </nav>
+<div class="lang-note" id="langNote"></div>
 
 <!-- ===================== AT-A-GLANCE ===================== -->
 <section class="glance-bar" id="glance">
   <div class="glance-inner">
     <div class="glance-card">
-      <div class="glance-label"><span class="crop-dot dot-apple"></span>Apple districts, soil moisture</div>
+      <div class="glance-label"><span class="crop-dot dot-apple"></span><span data-i18n="glance_water">Apple districts, soil moisture</span></div>
       <div class="glance-value is-loading" id="glanceWater">00.0%</div>
       <div class="glance-sub" id="glanceWaterSub">Loading…</div>
     </div>
     <div class="glance-card">
-      <div class="glance-label"><span class="crop-dot dot-apple"></span>Apple mandi price</div>
+      <div class="glance-label"><span class="crop-dot dot-apple"></span><span data-i18n="glance_price">Apple mandi price</span></div>
       <div class="glance-value is-loading" id="glancePrice">0000000</div>
       <div class="glance-sub" id="glancePriceSub">Loading…</div>
     </div>
     <div class="glance-card glance-forecast">
-      <div class="glance-label">Next-season signal <span class="glance-tag" title="A transparent heuristic based on soil-moisture and rainfall anomalies for apple districts (groundwater for saffron) — not a trained forecasting model.">heuristic</span></div>
+      <div class="glance-label"><span data-i18n="glance_forecast">Next-season signal</span> <span class="glance-tag" title="A transparent heuristic based on soil-moisture and rainfall anomalies for apple districts (groundwater for saffron) — not a trained forecasting model.">heuristic</span></div>
       <div class="glance-value is-loading" id="glanceForecast">0000000</div>
       <div class="glance-sub" id="glanceForecastSub">Loading…</div>
     </div>
@@ -83,31 +89,31 @@
     </g>
   </svg>
   <div class="hero-inner">
-    <div class="kicker reveal reveal-1">Early warning for agricultural water stress</div>
-    <h1 class="reveal reveal-2">The water table drops months<br>before the mandi price does.</h1>
-    <p class="hero-lede reveal reveal-3">
+    <div class="kicker reveal reveal-1" data-i18n="hero_kicker">Early warning for agricultural water stress</div>
+    <h1 class="reveal reveal-2" data-i18n-html="hero_h1">The water table drops months<br>before the mandi price does.</h1>
+    <p class="hero-lede reveal reveal-3" data-i18n="hero_lede">
       Jal Watch reads CGWB's telemetric groundwater sensors across saffron and apple-growing
       districts of Jammu &amp; Kashmir, and lines them up against years of Agmarknet mandi
       records — turning a slow, quiet decline underground into a warning that officials and
       growers can act on before harvest.
     </p>
     <div class="hero-actions reveal reveal-4">
-      <a href="#dashboard" class="btn btn-primary">Open the dashboard</a>
-      <a href="#method" class="btn btn-ghost">How the index works</a>
+      <a href="#dashboard" class="btn btn-primary" data-i18n="hero_cta_primary">Open the dashboard</a>
+      <a href="#method" class="btn btn-ghost" data-i18n="hero_cta_ghost">How the index works</a>
     </div>
   </div>
   <div class="hero-stat-row">
     <div class="hero-stat">
       <div class="hero-stat-num" data-count-to="5260" data-suffix="+">0</div>
-      <div class="hero-stat-label">CGWB DWLR stations nationwide, feeding readings every six hours</div>
+      <div class="hero-stat-label" data-i18n="hero_stat1">CGWB DWLR stations nationwide, feeding readings every six hours</div>
     </div>
     <div class="hero-stat">
       <div class="hero-stat-num" data-count-to="19">0</div>
-      <div class="hero-stat-label">APMC markets reporting daily in J&amp;K via Agmarknet</div>
+      <div class="hero-stat-label" data-i18n="hero_stat2">APMC markets reporting daily in J&amp;K via Agmarknet</div>
     </div>
     <div class="hero-stat">
       <div class="hero-stat-num" data-count-to="2">0</div>
-      <div class="hero-stat-label">Signals combined into one district-level stress score</div>
+      <div class="hero-stat-label" data-i18n="hero_stat3">Signals combined into one district-level stress score</div>
     </div>
   </div>
 </header>
@@ -115,28 +121,29 @@
 <!-- ===================== OVERVIEW ===================== -->
 <section id="overview" class="section">
   <div class="section-head">
-    <div class="kicker">Overview</div>
-    <h2>Two feeds, one signal, months of lead time</h2>
+    <div class="kicker" data-i18n="overview_kicker">Overview</div>
+    <h2 data-i18n="overview_h2">Two feeds, one signal, months of lead time</h2>
   </div>
   <div class="overview-grid">
     <div class="overview-card">
       <div class="overview-num">01</div>
       <h3>Groundwater telemetry</h3>
-      <p>Digital Water Level Recorders under CGWB's National Hydrology Project transmit
+      <p>Digital Water Level Recorders (<span class="glossary" data-term="dwlr" tabindex="0">DWLR<sup>?</sup></span>) under CGWB's National Hydrology Project transmit
       depth-to-water readings every six hours, surfaced publicly through India-WRIS. We track
       the districts behind J&amp;K's saffron and apple economy.</p>
     </div>
     <div class="overview-card">
       <div class="overview-num">02</div>
       <h3>Mandi price history</h3>
-      <p>Agmarknet publishes daily arrivals and modal prices across 19 J&amp;K markets. Years
+      <p><span class="glossary" data-term="agmarknet" tabindex="0">Agmarknet<sup>?</sup></span> publishes daily arrivals and modal prices across 19 J&amp;K
+      <span class="glossary" data-term="apmc" tabindex="0">APMC<sup>?</sup></span> markets. Years
       of this record let us see how past droughts and extraction stress actually showed up at
       the market — not just in theory.</p>
     </div>
     <div class="overview-card">
       <div class="overview-num">03</div>
       <h3>A stress score, not a prophecy</h3>
-      <p>We compute a seasonal z-score for water level per district, adjusted for rainfall, and
+      <p>We compute a seasonal <span class="glossary" data-term="zscore" tabindex="0">z-score<sup>?</sup></span> for water level per district, adjusted for rainfall, and
       show its historical relationship to arrivals. It's a decision-support signal for officials
       and growers — deliberately not framed as a price forecast.</p>
     </div>
@@ -146,8 +153,8 @@
 <!-- ===================== DASHBOARD ===================== -->
 <section id="dashboard" class="section section-dark">
   <div class="section-head">
-    <div class="kicker">Dashboard</div>
-    <h2>District water stress dashboard</h2>
+    <div class="kicker" data-i18n="dashboard_kicker">Dashboard</div>
+    <h2 data-i18n="dashboard_h2">District water stress dashboard</h2>
     <p class="section-sub">Sample values shown below — wire in <code>assets/data.js</code> to a live
     feed to make this real. See the README for the API notes.</p>
   </div>
@@ -155,13 +162,13 @@
   <div class="dash-layout">
     <div class="dash-sidebar">
       <div class="dash-sidebar-label">Districts on the DWLR network</div>
-      <input type="text" id="districtSearch" class="search-input" placeholder="Search district or crop…" autocomplete="off">
+      <input type="text" id="districtSearch" class="search-input" placeholder="Search district or crop…" data-i18n-placeholder="search_placeholder" autocomplete="off">
       <div id="districtList"></div>
 
       <div class="compare-block">
         <label class="compare-label">
           <input type="checkbox" id="compareToggle">
-          Compare with another district
+          <span data-i18n="compare_label">Compare with another district</span>
         </label>
         <select id="compareSelect" class="compare-select" disabled></select>
       </div>
@@ -176,6 +183,34 @@
         <div class="pill-group">
           <div class="status-pill" id="statusPill">Water stress index: 1.8</div>
           <div class="live-badge" id="liveBadge">Demo price data</div>
+        </div>
+      </div>
+
+      <div class="risk-gauge" id="riskGauge">
+        <div class="gauge-track">
+          <span class="gauge-seg gauge-seg-normal"></span>
+          <span class="gauge-seg gauge-seg-watch"></span>
+          <span class="gauge-seg gauge-seg-stress"></span>
+          <span class="gauge-seg gauge-seg-severe"></span>
+          <div class="gauge-marker" id="gaugeMarker"></div>
+        </div>
+        <div class="gauge-labels">
+          <span class="gauge-seg-label"></span>
+          <span class="gauge-seg-label"></span>
+          <span class="gauge-seg-label"></span>
+          <span class="gauge-seg-label"></span>
+        </div>
+      </div>
+
+      <div class="plain-insight" id="plainInsight">
+        <div class="plain-insight-icon" id="plainInsightIcon">🟢</div>
+        <div class="plain-insight-body">
+          <div class="plain-insight-title" id="plainInsightTitle">What this means for you</div>
+          <p class="plain-insight-text" id="plainInsightBody">Loading…</p>
+          <div class="plain-insight-actions">
+            <button type="button" id="plainInsightListen" class="btn-small">🔊 Listen</button>
+            <a href="#" target="_blank" rel="noopener" id="plainInsightShare" class="btn-small btn-share">📤 Share on WhatsApp</a>
+          </div>
         </div>
       </div>
 
@@ -239,7 +274,7 @@
       </div>
 
       <div class="panel-actions">
-        <button id="exportCsvBtn" class="btn-small">Export CSV</button>
+        <button id="exportCsvBtn" class="btn-small" data-i18n="export_csv">Export CSV</button>
       </div>
 
       <p class="insight" id="insightText"></p>
@@ -257,8 +292,8 @@
      README for what's live vs. demo. -->
 <section id="link" class="section section-dark">
   <div class="section-head">
-    <div class="kicker">Signal links</div>
-    <h2>How rainfall, soil moisture, floods, and price connect — right now</h2>
+    <div class="kicker" data-i18n="links_kicker">Signal links</div>
+    <h2 data-i18n="links_h2">How rainfall, soil moisture, floods, and price connect — right now</h2>
     <p class="section-sub" id="linkSubhead">For <b id="linkDistrictName">Shopian</b>: too little rain lowers soil
     moisture and squeezes arrivals; too much raises flood risk and disrupts them the other way. Both paths show up
     at the mandi.</p>
@@ -319,8 +354,8 @@
 <!-- ===================== METHODOLOGY ===================== -->
 <section id="method" class="section">
   <div class="section-head">
-    <div class="kicker">Methodology</div>
-    <h2>How the stress index is built</h2>
+    <div class="kicker" data-i18n="method_kicker">Methodology</div>
+    <h2 data-i18n="method_h2">How the stress index is built</h2>
   </div>
   <ol class="method-list">
     <li>
@@ -379,8 +414,8 @@
 <!-- ===================== SOURCES ===================== -->
 <section id="sources" class="section section-dark">
   <div class="section-head">
-    <div class="kicker">Data sources</div>
-    <h2>Real, public, structured</h2>
+    <div class="kicker" data-i18n="sources_kicker">Data sources</div>
+    <h2 data-i18n="sources_h2">Real, public, structured</h2>
   </div>
   <div class="sources-grid">
     <div class="source-card">
@@ -402,7 +437,7 @@
       <a href="https://mausam.imd.gov.in" target="_blank" rel="noopener">mausam.imd.gov.in →</a>
     </div>
     <div class="source-card">
-      <h4>NASA POWER (root-zone soil wetness)</h4>
+      <h4>NASA POWER (root-zone <span class="glossary" data-term="soilmoisture" tabindex="0">soil wetness<sup>?</sup></span>)</h4>
       <p>Live current reading for apple districts via the free, keyless GWETROOT
       parameter (MERRA-2 reanalysis) — the historical trend line is still derived
       from demo rainfall; see README for backfilling it with real POWER data.</p>
@@ -420,10 +455,11 @@
 </section>
 
 <footer class="footer">
-  <div>Jal Watch — built for Smart India Hackathon. Prototype uses illustrative data; see README for wiring in live feeds.</div>
+  <div data-i18n="footer_text">Jal Watch — built for Smart India Hackathon. Prototype uses illustrative data; see README for wiring in live feeds.</div>
 </footer>
 
 <script src="assets/data.js"></script>
+<script src="assets/i18n.js"></script>
 <script src="assets/app.js"></script>
 </body>
 </html>
