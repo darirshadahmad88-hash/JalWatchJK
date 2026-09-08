@@ -306,137 +306,158 @@
 
 <!-- ===================== OVERVIEW ===================== -->
 <section id="overview" class="section">
-  <div class="section-head">
-    <div class="kicker" data-i18n="overview_kicker">Overview</div>
-    <h2 data-i18n="overview_h2">Two feeds, one signal, months of lead time</h2>
-  </div>
-  <div class="overview-grid">
-    <div class="overview-card">
-      <div class="overview-num">01</div>
-      <h3>Groundwater telemetry</h3>
-      <p>Digital Water Level Recorders (<span class="glossary" data-term="dwlr" tabindex="0">DWLR<sup>?</sup></span>) under CGWB's National Hydrology Project transmit
-      depth-to-water readings every six hours, surfaced publicly through India-WRIS. We track
-      the districts behind J&amp;K's saffron and apple economy.</p>
+  <details class="collapsible-section">
+    <summary class="section-head-toggle">
+      <div class="section-head">
+        <div class="kicker" data-i18n="overview_kicker">Overview</div>
+        <h2 data-i18n="overview_h2">Two feeds, one signal, months of lead time</h2>
+      </div>
+      <span class="section-chevron" aria-hidden="true">▾</span>
+    </summary>
+    <div class="section-body">
+      <div class="overview-grid">
+        <div class="overview-card">
+          <div class="overview-num">01</div>
+          <h3>Groundwater telemetry</h3>
+          <p>Digital Water Level Recorders (<span class="glossary" data-term="dwlr" tabindex="0">DWLR<sup>?</sup></span>) under CGWB's National Hydrology Project transmit
+          depth-to-water readings every six hours, surfaced publicly through India-WRIS. We track
+          the districts behind J&amp;K's saffron and apple economy.</p>
+        </div>
+        <div class="overview-card">
+          <div class="overview-num">02</div>
+          <h3>Mandi price history</h3>
+          <p><span class="glossary" data-term="agmarknet" tabindex="0">Agmarknet<sup>?</sup></span> publishes daily arrivals and modal prices across 19 J&amp;K
+          <span class="glossary" data-term="apmc" tabindex="0">APMC<sup>?</sup></span> markets. Years
+          of this record let us see how past droughts and extraction stress actually showed up at
+          the market — not just in theory.</p>
+        </div>
+        <div class="overview-card">
+          <div class="overview-num">03</div>
+          <h3>A stress score, not a prophecy</h3>
+          <p>We compute a seasonal <span class="glossary" data-term="zscore" tabindex="0">z-score<sup>?</sup></span> for water level per district, adjusted for rainfall, and
+          show its historical relationship to arrivals. It's a decision-support signal for officials
+          and growers — deliberately not framed as a price forecast.</p>
+        </div>
+      </div>
     </div>
-    <div class="overview-card">
-      <div class="overview-num">02</div>
-      <h3>Mandi price history</h3>
-      <p><span class="glossary" data-term="agmarknet" tabindex="0">Agmarknet<sup>?</sup></span> publishes daily arrivals and modal prices across 19 J&amp;K
-      <span class="glossary" data-term="apmc" tabindex="0">APMC<sup>?</sup></span> markets. Years
-      of this record let us see how past droughts and extraction stress actually showed up at
-      the market — not just in theory.</p>
-    </div>
-    <div class="overview-card">
-      <div class="overview-num">03</div>
-      <h3>A stress score, not a prophecy</h3>
-      <p>We compute a seasonal <span class="glossary" data-term="zscore" tabindex="0">z-score<sup>?</sup></span> for water level per district, adjusted for rainfall, and
-      show its historical relationship to arrivals. It's a decision-support signal for officials
-      and growers — deliberately not framed as a price forecast.</p>
-    </div>
-  </div>
+  </details>
 </section>
 
 <!-- ===================== METHODOLOGY ===================== -->
 <section id="method" class="section">
-  <div class="section-head">
-    <div class="kicker" data-i18n="method_kicker">Methodology</div>
-    <h2 data-i18n="method_h2">How the stress index is built</h2>
-  </div>
-  <ol class="method-list">
-    <li>
-      <span class="method-step">1</span>
-      <div>
-        <h4>Match the signal to the crop, not just the sensor</h4>
-        <p>Saffron corms sit close to the aquifer, so Pampore's index still runs on DWLR
-        depth-to-water. Apple orchards in Kashmir are largely rain-fed — growers and agronomists
-        report they respond to root-zone soil moisture and winter snowpack, not the water table
-        directly. So Shopian, Sopore, and Pulwama are scored on a soil-moisture series (derived
-        from rainfall, with a damped lag matching how moisture actually persists in soil) instead
-        of raw groundwater depth. Each is baselined against its own historical same-season values,
-        not a flat annual average.</p>
+  <details class="collapsible-section">
+    <summary class="section-head-toggle">
+      <div class="section-head">
+        <div class="kicker" data-i18n="method_kicker">Methodology</div>
+        <h2 data-i18n="method_h2">How the stress index is built</h2>
       </div>
-    </li>
-    <li>
-      <span class="method-step">2</span>
-      <div>
-        <h4>Adjust for rainfall</h4>
-        <p>A dry monsoon and over-extraction look identical in raw water-level data. Overlaying
-        IMD rainfall lets the index distinguish "drought year" from "structural decline" —
-        the second is the one worth escalating.</p>
-      </div>
-    </li>
-    <li>
-      <span class="method-step">3</span>
-      <div>
-        <h4>Score, don't predict</h4>
-        <p>The output is a z-score bucketed into normal / watch / stress / severe, alongside
-        the closest historical analogue season and what happened to arrivals and prices then.
-        No price forecast is generated — the historical parallel is left for a human to judge.</p>
-      </div>
-    </li>
-    <li>
-      <span class="method-step">4</span>
-      <div>
-        <h4>Alert two audiences differently</h4>
-        <p>Farmers get a short, local-language irrigation-planning nudge. District officials and
-        APMC administrators get the full dashboard for procurement and drought-relief planning.</p>
-      </div>
-    </li>
-    <li>
-      <span class="method-step">5</span>
-      <div>
-        <h4>The top-of-page signal is a formula, not a model</h4>
-        <p>The "next-season signal" shown at the top of this page is a documented heuristic —
-        it moves in proportion to how far current water and rainfall readings sit from their
-        seasonal average, using constants we chose and disclosed rather than fitted from data.
-        It's there to make the water-price relationship legible at a glance, not to claim
-        predictive accuracy.</p>
-      </div>
-    </li>
-  </ol>
+      <span class="section-chevron" aria-hidden="true">▾</span>
+    </summary>
+    <div class="section-body">
+      <ol class="method-list">
+        <li>
+          <span class="method-step">1</span>
+          <div>
+            <h4>Match the signal to the crop, not just the sensor</h4>
+            <p>Saffron corms sit close to the aquifer, so Pampore's index still runs on DWLR
+            depth-to-water. Apple orchards in Kashmir are largely rain-fed — growers and agronomists
+            report they respond to root-zone soil moisture and winter snowpack, not the water table
+            directly. So Shopian, Sopore, and Pulwama are scored on a soil-moisture series (derived
+            from rainfall, with a damped lag matching how moisture actually persists in soil) instead
+            of raw groundwater depth. Each is baselined against its own historical same-season values,
+            not a flat annual average.</p>
+          </div>
+        </li>
+        <li>
+          <span class="method-step">2</span>
+          <div>
+            <h4>Adjust for rainfall</h4>
+            <p>A dry monsoon and over-extraction look identical in raw water-level data. Overlaying
+            IMD rainfall lets the index distinguish "drought year" from "structural decline" —
+            the second is the one worth escalating.</p>
+          </div>
+        </li>
+        <li>
+          <span class="method-step">3</span>
+          <div>
+            <h4>Score, don't predict</h4>
+            <p>The output is a z-score bucketed into normal / watch / stress / severe, alongside
+            the closest historical analogue season and what happened to arrivals and prices then.
+            No price forecast is generated — the historical parallel is left for a human to judge.</p>
+          </div>
+        </li>
+        <li>
+          <span class="method-step">4</span>
+          <div>
+            <h4>Alert two audiences differently</h4>
+            <p>Farmers get a short, local-language irrigation-planning nudge. District officials and
+            APMC administrators get the full dashboard for procurement and drought-relief planning.</p>
+          </div>
+        </li>
+        <li>
+          <span class="method-step">5</span>
+          <div>
+            <h4>The top-of-page signal is a formula, not a model</h4>
+            <p>The "next-season signal" shown at the top of this page is a documented heuristic —
+            it moves in proportion to how far current water and rainfall readings sit from their
+            seasonal average, using constants we chose and disclosed rather than fitted from data.
+            It's there to make the water-price relationship legible at a glance, not to claim
+            predictive accuracy.</p>
+          </div>
+        </li>
+      </ol>
+    </div>
+  </details>
 </section>
 
 <!-- ===================== SOURCES ===================== -->
 <section id="sources" class="section section-dark">
-  <div class="section-head">
-    <div class="kicker" data-i18n="sources_kicker">Data sources</div>
-    <h2 data-i18n="sources_h2">Real, public, structured</h2>
-  </div>
-  <div class="sources-grid">
-    <div class="source-card">
-      <h4>CGWB / India-WRIS</h4>
-      <p>Groundwater level readings from telemetric DWLR stations under the National Hydrology
-      Project. Surfaced via the India-WRIS public portal.</p>
-      <a href="https://indiawris.gov.in" target="_blank" rel="noopener">indiawris.gov.in →</a>
+  <details class="collapsible-section">
+    <summary class="section-head-toggle">
+      <div class="section-head">
+        <div class="kicker" data-i18n="sources_kicker">Data sources</div>
+        <h2 data-i18n="sources_h2">Real, public, structured</h2>
+      </div>
+      <span class="section-chevron" aria-hidden="true">▾</span>
+    </summary>
+    <div class="section-body">
+      <div class="sources-grid">
+        <div class="source-card">
+          <h4>CGWB / India-WRIS</h4>
+          <p>Groundwater level readings from telemetric DWLR stations under the National Hydrology
+          Project. Surfaced via the India-WRIS public portal.</p>
+          <a href="https://indiawris.gov.in" target="_blank" rel="noopener">indiawris.gov.in →</a>
+        </div>
+        <div class="source-card">
+          <h4>Agmarknet / data.gov.in</h4>
+          <p>Daily mandi arrivals and price data across J&amp;K's 19 APMC markets, available through
+          a documented public API.</p>
+          <a href="https://data.gov.in" target="_blank" rel="noopener">data.gov.in →</a>
+        </div>
+        <div class="source-card">
+          <h4>IMD rainfall (optional layer)</h4>
+          <p>District-level rainfall used to separate drought-driven decline from over-extraction
+          in the stress index.</p>
+          <a href="https://mausam.imd.gov.in" target="_blank" rel="noopener">mausam.imd.gov.in →</a>
+        </div>
+        <div class="source-card">
+          <h4>NASA POWER (root-zone <span class="glossary" data-term="soilmoisture" tabindex="0">soil wetness<sup>?</sup></span>)</h4>
+          <p>Live current reading for apple districts via the free, keyless GWETROOT
+          parameter (MERRA-2 reanalysis) — the historical trend line is still derived
+          from demo rainfall; see README for backfilling it with real POWER data.</p>
+          <a href="https://power.larc.nasa.gov" target="_blank" rel="noopener">power.larc.nasa.gov →</a>
+        </div>
+        <div class="source-card">
+          <h4>Google Flood Hub / CWC (Jhelum flood status)</h4>
+          <p>The top-right Flood Watch widget reads the Jhelum gauge at Ram Munshi
+          Bagh — severity, trend, and threshold levels sourced from CWC via
+          Google's Flood Forecasting API. Needs a waitlisted API key; shows a
+          clearly-labelled demo reading until one is set. See README.</p>
+          <a href="https://sites.research.google/floods" target="_blank" rel="noopener">sites.research.google/floods →</a>
+        </div>
+      </div>
     </div>
-    <div class="source-card">
-      <h4>Agmarknet / data.gov.in</h4>
-      <p>Daily mandi arrivals and price data across J&amp;K's 19 APMC markets, available through
-      a documented public API.</p>
-      <a href="https://data.gov.in" target="_blank" rel="noopener">data.gov.in →</a>
-    </div>
-    <div class="source-card">
-      <h4>IMD rainfall (optional layer)</h4>
-      <p>District-level rainfall used to separate drought-driven decline from over-extraction
-      in the stress index.</p>
-      <a href="https://mausam.imd.gov.in" target="_blank" rel="noopener">mausam.imd.gov.in →</a>
-    </div>
-    <div class="source-card">
-      <h4>NASA POWER (root-zone <span class="glossary" data-term="soilmoisture" tabindex="0">soil wetness<sup>?</sup></span>)</h4>
-      <p>Live current reading for apple districts via the free, keyless GWETROOT
-      parameter (MERRA-2 reanalysis) — the historical trend line is still derived
-      from demo rainfall; see README for backfilling it with real POWER data.</p>
-      <a href="https://power.larc.nasa.gov" target="_blank" rel="noopener">power.larc.nasa.gov →</a>
-    </div>
-    <div class="source-card">
-      <h4>Google Flood Hub / CWC (Jhelum flood status)</h4>
-      <p>The top-right Flood Watch widget reads the Jhelum gauge at Ram Munshi
-      Bagh — severity, trend, and threshold levels sourced from CWC via
-      Google's Flood Forecasting API. Needs a waitlisted API key; shows a
-      clearly-labelled demo reading until one is set. See README.</p>
-      <a href="https://sites.research.google/floods" target="_blank" rel="noopener">sites.research.google/floods →</a>
-    </div>
-  </div>
+  </details>
 </section>
 
 <footer class="footer">
