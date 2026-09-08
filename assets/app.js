@@ -304,11 +304,64 @@ function selectDistrict(id) {
   renderCharts();
   refreshMapHighlight();
   if (leafletMap) leafletMap.panTo([d.lat, d.lon]);
-  loadLivePrice(d);
-  loadLiveSoilMoisture(d);
+  updateSampleNote(d, null, null); // reset to a neutral "checking…" state first
+  const token = ++sampleNoteToken;
+  Promise.all([loadLivePrice(d), loadLiveSoilMoisture(d)]).then(([priceLive, soilLive]) => {
+    if (token === sampleNoteToken) updateSampleNote(d, priceLive, soilLive);
+  });
   renderForecast(d);
   renderLinkDashboard(d);
   if (typeof renderPlainInsight === 'function') renderPlainInsight(d);
+}
+
+// ---------------------------------------------------------------
+// Dashboard-wide "sample values" banner — instead of one static
+// disclaimer, this reflects what's actually live vs. demo *for the
+// currently selected district*: the mandi-price badge and (for apple
+// districts) the current soil-moisture reading can be genuinely live;
+// historical chart trends and groundwater depth are always demo (see
+// README for why). Updated once both live checks below have resolved.
+// ---------------------------------------------------------------
+let sampleNoteToken = 0;
+function updateSampleNote(d, priceLive, soilLive) {
+  const note = document.getElementById('dashSampleNote');
+  if (!note) return;
+  const name = d.name.split(',')[0];
+  const hasSoilSignal = signalMeta(d).key === 'soilMoisture';
+
+  if (priceLive === null) {
+    note.innerHTML = `Checking live feeds for ${name}…`;
+    note.classList.remove('is-live', 'is-partial');
+    return;
+  }
+
+  let html, cls;
+  if (hasSoilSignal) {
+    if (priceLive && soilLive) {
+      html = `<b>Live for ${name}:</b> today's soil-moisture reading and the latest mandi price. Historical trend lines in the charts below are still illustrative demo data — see the README.`;
+      cls = 'is-live';
+    } else if (soilLive) {
+      html = `<b>Live for ${name}:</b> today's soil-moisture reading. Mandi price and all historical trends below are still illustrative demo data.`;
+      cls = 'is-partial';
+    } else if (priceLive) {
+      html = `<b>Live for ${name}:</b> the latest mandi price. Soil moisture and all historical trends below are still illustrative demo data.`;
+      cls = 'is-partial';
+    } else {
+      html = `Live feeds aren't reachable right now for ${name} — every chart below is illustrative demo data. See the README for details.`;
+      cls = '';
+    }
+  } else {
+    if (priceLive) {
+      html = `<b>Live for ${name}:</b> the latest mandi price. Groundwater readings and all historical trends below are still illustrative demo data — India-WRIS has no stable public API yet (see README).`;
+      cls = 'is-partial';
+    } else {
+      html = `No live feed is reachable for ${name} right now — every value below, including groundwater and price, is illustrative demo data. See the README for details.`;
+      cls = '';
+    }
+  }
+  note.innerHTML = html;
+  note.classList.toggle('is-live', cls === 'is-live');
+  note.classList.toggle('is-partial', cls === 'is-partial');
 }
 
 // ---------------------------------------------------------------
@@ -334,7 +387,7 @@ async function loadLiveSoilMoisture(d) {
   if (meta.key !== 'soilMoisture') {
     hint.textContent = 'Groundwater feed not wired live yet — see README';
     hint.classList.remove('is-live');
-    return;
+    return false;
   }
 
   hint.textContent = 'Checking NASA POWER…';
@@ -345,9 +398,11 @@ async function loadLiveSoilMoisture(d) {
     const payload = await res.json();
     hint.textContent = `● Live: ${payload.root_zone_wetness_pct}% root-zone wetness (NASA POWER, ${payload.date})`;
     hint.classList.add('is-live');
+    return true;
   } catch (err) {
     hint.textContent = 'Demo trend shown — live feed unavailable right now';
     hint.classList.remove('is-live');
+    return false;
   }
 }
 
@@ -374,13 +429,16 @@ async function loadLivePrice(d) {
       badge.textContent = 'Live from Agmarknet';
       badge.classList.add('is-live');
       line.innerHTML = `Latest reported: <b>₹${Number(match.modal_price).toLocaleString('en-IN')}/quintal</b> at ${match.market} mandi, ${match.arrival_date}`;
+      return true;
     } else {
       badge.textContent = 'Demo price data (no live match for this market)';
       line.textContent = '';
+      return false;
     }
   } catch (err) {
     badge.textContent = 'Demo price data (live feed not connected yet)';
     line.textContent = '';
+    return false;
   }
 }
 
