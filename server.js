@@ -125,6 +125,35 @@ app.post('/api/crop-triage', async (req, res) => {
   }
 });
 
+// ---------------------------------------------------------------
+// Farmer brief — aggregates the water/soil signal, mandi price, and
+// flood status for one district into a single JSON response plus a
+// ready-to-send `telegramMessage` string. Built for automation tools
+// like n8n to poll on a schedule and forward straight to a farmer's
+// Telegram chat. Shared logic lives in lib/farmer-brief.js so this
+// behaves identically to the Netlify function.
+//
+// Usage: GET /api/farmer-brief?district=pulwama
+// Valid district ids: pampore, shopian, sopore, pulwama
+// ---------------------------------------------------------------
+const { buildFarmerBrief } = require('./lib/farmer-brief');
+
+app.get('/api/farmer-brief', async (req, res) => {
+  const districtId = req.query.district;
+
+  if (!districtId) {
+    return res.status(400).json({ error: 'district query param is required, e.g. ?district=pulwama' });
+  }
+
+  try {
+    const brief = await buildFarmerBrief(districtId);
+    res.set('Cache-Control', 'public, max-age=900');
+    res.json(brief);
+  } catch (err) {
+    res.status(err.statusCode || 502).json({ error: String(err.message || err) });
+  }
+});
+
 app.listen(PORT, () => console.log(`Jal Watch running on port ${PORT}`));
 
 // ---------------------------------------------------------------
