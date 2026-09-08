@@ -339,6 +339,10 @@ code{
   border-radius:3px;
   overflow:hidden;
   border:1px solid var(--line-dark);
+  background:#1b1f1c;
+}
+.map-view .leaflet-tile-pane{
+  filter:invert(1) hue-rotate(180deg) brightness(0.92) contrast(0.92) saturate(0.9);
 }
 .sidebar-map-view{height:440px;}
 @media (max-width: 780px){
