@@ -74,6 +74,21 @@
         <div class="sidebar-map-label">District map<span class="panel-hint">Click a marker to select it</span></div>
         <div id="mapView" class="map-view sidebar-map-view"></div>
       </div>
+
+      <div class="sidebar-map-wrap">
+        <div class="sidebar-map-label">
+          <span id="waterChartTitle">Soil moisture vs. rainfall</span>
+          <span class="panel-hint" id="waterChartHint"></span>
+        </div>
+        <div class="chart-wrap sidebar-chart-view"><canvas id="waterChart"></canvas></div>
+        <p class="live-price" id="waterChartNote"></p>
+      </div>
+
+      <div class="sidebar-map-wrap">
+        <div class="sidebar-map-label">Mandi arrivals &amp; modal price</div>
+        <div class="chart-wrap sidebar-chart-view"><canvas id="priceChart"></canvas></div>
+        <p class="live-price" id="livePriceLine"></p>
+      </div>
     </div>
 
     <div class="dash-main">
@@ -196,21 +211,6 @@
           <input type="range" id="rangeStart" min="0" max="35" value="0" step="1">
           <input type="range" id="rangeEnd" min="0" max="35" value="35" step="1">
         </div>
-      </div>
-
-      <div class="panel">
-        <div class="panel-head-row">
-          <h4 id="waterChartTitle">GROUNDWATER LEVEL VS. RAINFALL</h4>
-          <span class="panel-hint" id="waterChartHint"></span>
-        </div>
-        <div class="chart-wrap"><canvas id="waterChart"></canvas></div>
-        <p class="live-price" id="waterChartNote"></p>
-      </div>
-
-      <div class="panel">
-        <h4>Mandi arrivals &amp; modal price</h4>
-        <div class="chart-wrap"><canvas id="priceChart"></canvas></div>
-        <p class="live-price" id="livePriceLine"></p>
       </div>
 
       <div class="panel-actions">
