@@ -75,19 +75,40 @@
         <div id="mapView" class="map-view sidebar-map-view"></div>
       </div>
 
-      <div class="sidebar-map-wrap">
-        <div class="sidebar-map-label">
-          <span id="waterChartTitle">Soil moisture vs. rainfall</span>
-          <span class="panel-hint" id="waterChartHint"></span>
+      <div class="chart-dashboard">
+        <!-- Water vs Rainfall Chart -->
+        <div class="chart-card">
+          <div class="chart-header">
+            <div>
+              <div class="sidebar-map-label" id="waterChartTitle">Soil moisture vs. rainfall</div>
+              <span class="indicator" id="waterIndicator"></span>
+            </div>
+            <div class="chart-toggles">
+              <button class="toggle-btn active" data-chart="water" data-series="rainfall" title="Toggle rainfall">Rain</button>
+              <button class="toggle-btn active" data-chart="water" data-series="water">Water</button>
+            </div>
+          </div>
+          <div class="chart-wrap sidebar-chart-view"><canvas id="waterChart"></canvas></div>
+          <div class="chart-legend" id="waterLegend"></div>
+          <p class="live-price" id="waterChartNote"></p>
         </div>
-        <div class="chart-wrap sidebar-chart-view"><canvas id="waterChart"></canvas></div>
-        <p class="live-price" id="waterChartNote"></p>
-      </div>
 
-      <div class="sidebar-map-wrap">
-        <div class="sidebar-map-label">Mandi arrivals &amp; modal price</div>
-        <div class="chart-wrap sidebar-chart-view"><canvas id="priceChart"></canvas></div>
-        <p class="live-price" id="livePriceLine"></p>
+        <!-- Mandi Price Chart -->
+        <div class="chart-card">
+          <div class="chart-header">
+            <div>
+              <div class="sidebar-map-label">Mandi arrivals &amp; modal price</div>
+              <span class="indicator" id="priceIndicator"></span>
+            </div>
+            <div class="chart-toggles">
+              <button class="toggle-btn active" data-chart="price" data-series="arrivals" title="Toggle arrivals">Arr.</button>
+              <button class="toggle-btn active" data-chart="price" data-series="price">Price</button>
+            </div>
+          </div>
+          <div class="chart-wrap sidebar-chart-view"><canvas id="priceChart"></canvas></div>
+          <div class="chart-legend" id="priceLegend"></div>
+          <p class="live-price" id="livePriceLine"></p>
+        </div>
       </div>
     </div>
 
