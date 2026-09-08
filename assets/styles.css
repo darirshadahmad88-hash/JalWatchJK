@@ -356,7 +356,7 @@ code{
 }
 
 /* ---------- interactive chart dashboard ---------- */
-.chart-dashboard{display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-top:0;}
+.chart-dashboard{display:flex; flex-direction:column; gap:14px; margin-top:0;}
 .chart-card{background:var(--panel-dark); border:1px solid var(--line-dark); border-radius:4px; padding:12px; display:flex; flex-direction:column;}
 .chart-header{display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:8px; gap:8px;}
 .chart-header > div:first-child{flex:1;}
@@ -380,9 +380,6 @@ code{
 }
 .legend-item{display:flex; align-items:center; gap:3px;}
 .legend-dot{width:6px; height:6px; border-radius:1px;}
-@media (max-width: 780px){
-  .chart-dashboard{grid-template-columns:1fr;}
-}
 .panel-head-row{
   display:flex; align-items:baseline; justify-content:space-between;
   margin-bottom:12px;
