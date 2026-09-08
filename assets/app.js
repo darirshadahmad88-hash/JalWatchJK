@@ -970,6 +970,39 @@ function initChartToggles() {
 }
 
 // ---------------------------------------------------------------
+// Hamburger nav menu — holds Overview / Dashboard / Methodology /
+// Data sources so the at-a-glance strip has room to show in full.
+// ---------------------------------------------------------------
+function initNavMenu() {
+  const menu = document.getElementById('navMenu');
+  const toggle = document.getElementById('navMenuToggle');
+  if (!menu || !toggle) return;
+
+  const closeMenu = () => {
+    menu.classList.remove('is-open');
+    toggle.setAttribute('aria-expanded', 'false');
+  };
+  const openMenu = () => {
+    menu.classList.add('is-open');
+    toggle.setAttribute('aria-expanded', 'true');
+  };
+
+  toggle.addEventListener('click', e => {
+    e.stopPropagation();
+    menu.classList.contains('is-open') ? closeMenu() : openMenu();
+  });
+  menu.querySelectorAll('.nav-menu-dropdown a').forEach(link => {
+    link.addEventListener('click', closeMenu);
+  });
+  document.addEventListener('click', e => {
+    if (!menu.contains(e.target)) closeMenu();
+  });
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') closeMenu();
+  });
+}
+
+// ---------------------------------------------------------------
 // Overview / Methodology / Data sources are collapsed <details>
 // sections by default. If a link jumps to one (nav bar, hero CTAs),
 // auto-expand it so the person doesn't land on a closed panel.
@@ -1001,6 +1034,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initMap();
   initFloodWidget();
   initChartToggles();
+  initNavMenu();
   initCollapsibleSectionLinks();
   renderDistrictDropdown();
   selectDistrict(currentId);
