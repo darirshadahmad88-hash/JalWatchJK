@@ -45,8 +45,8 @@ code{
 /* ---------- nav ---------- */
 .nav{
   position:sticky; top:0; z-index:50;
-  display:flex; align-items:center; justify-content:space-between;
-  padding:16px 32px;
+  display:flex; align-items:center; gap:28px;
+  padding:14px 32px;
   background:rgba(246,243,234,0.92);
   backdrop-filter:blur(6px);
   border-bottom:1px solid var(--line);
@@ -57,9 +57,11 @@ code{
   font-weight:500;
   text-decoration:none;
   letter-spacing:.01em;
+  flex:none;
 }
 .nav-brand span{color:var(--ink-dim); font-family:var(--sans); font-weight:400;}
 .nav-brand-sub{color:var(--saffron) !important; font-family:var(--serif) !important;}
+.nav-right{display:flex; align-items:center; gap:26px; margin-left:auto; flex:none;}
 .nav-links{display:flex; gap:26px;}
 .nav-links a{
   font-size:14px;
@@ -78,32 +80,39 @@ code{
 .nav-links a:hover{color:var(--ink);}
 .nav-links a:hover::after{right:0;}
 
-/* ---------- at-a-glance bar ---------- */
-.glance-bar{
-  background:var(--bg-dark);
-  border-bottom:1px solid var(--line-dark);
-  padding:20px 32px;
+/* ---------- at-a-glance strip, inline in the nav ---------- */
+.nav-glance{
+  display:flex; align-items:center; gap:22px;
+  flex:1 1 auto; min-width:0;
+  overflow:hidden;
 }
-.glance-inner{
-  max-width:1100px;
-  margin:0 auto;
-  display:grid;
-  grid-template-columns:repeat(3,1fr);
-  gap:0;
+.nav-glance-item{
+  display:flex; align-items:baseline; gap:6px;
+  padding-left:22px;
+  border-left:1px solid var(--line);
+  min-width:0;
+  white-space:nowrap;
 }
-.glance-card{
-  padding:4px 28px;
-  border-right:1px solid var(--line-dark);
+.nav-glance-item:first-child{padding-left:0; border-left:none;}
+.nav-glance-label{
+  font-size:11.5px; color:var(--ink-dim); letter-spacing:.01em;
+  overflow:hidden; text-overflow:ellipsis; max-width:150px;
 }
-.glance-card:first-child{padding-left:0;}
-.glance-card:last-child{border-right:none;}
-.glance-label{
-  font-size:11px;
-  letter-spacing:.04em;
-  color:var(--ink-light-dim);
-  margin-bottom:8px;
-  display:flex; align-items:center; gap:8px;
+.nav-glance-value{
+  font-family:var(--serif); font-size:15px; color:var(--ink);
+  font-variant-numeric:tabular-nums;
 }
+.nav-glance-value.up{color:var(--normal);}
+.nav-glance-value.down{color:var(--stress);}
+.nav-glance-sub{display:none;}
+.nav-glance .crop-dot{margin-right:0;}
+.nav-glance .glance-tag{font-size:9.5px; padding:1px 6px; color:var(--saffron); border-color:var(--line);}
+
+@media (max-width:1180px){
+  .nav-glance{display:none;}
+}
+
+/* ---------- at-a-glance strip (nav) shares these mobile fallbacks ---------- */
 .glance-tag{
   font-size:10px;
   padding:2px 7px;
@@ -112,21 +121,6 @@ code{
   color:#d9a86a;
   letter-spacing:.02em;
   cursor:help;
-}
-.glance-value{
-  font-family:var(--serif);
-  font-size:26px;
-  color:var(--ink-light);
-  line-height:1.15;
-  font-variant-numeric:tabular-nums;
-}
-.glance-value.up{color:var(--stress);}
-.glance-value.down{color:var(--normal);}
-.glance-sub{
-  font-size:12px;
-  color:var(--ink-light-dim);
-  margin-top:6px;
-  line-height:1.5;
 }
 .is-loading{position:relative; color:transparent !important; border-radius:3px;
   background:linear-gradient(90deg, rgba(255,255,255,0.05) 25%, rgba(255,255,255,0.11) 37%, rgba(255,255,255,0.05) 63%);
@@ -520,9 +514,6 @@ code{
 /* ---------- responsive ---------- */
 @media (max-width:780px){
   .nav-links{display:none;}
-  .glance-inner{grid-template-columns:1fr; gap:18px;}
-  .glance-card{border-right:none; border-bottom:1px solid var(--line-dark); padding:0 0 16px;}
-  .glance-card:last-child{border-bottom:none;}
   .overview-grid{grid-template-columns:1fr; gap:28px;}
   .hero-stat-row{grid-template-columns:1fr;}
   .hero-stat{border-right:none; border-bottom:1px solid var(--line); padding:18px 0;}
