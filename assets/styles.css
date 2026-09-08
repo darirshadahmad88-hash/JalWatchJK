@@ -248,6 +248,43 @@ code{
 }
 .section-head{margin-bottom:44px; max-width:620px;}
 
+/* ---------- three-column info row (overview / methodology / sources) ---------- */
+.three-col-row{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  align-items:start;
+  border-top:1px solid var(--line);
+}
+.three-col-section{
+  max-width:none;
+  margin:0;
+  padding:56px 36px;
+  border-right:1px solid var(--line);
+  /* each column is independently scrollable when open */
+  min-width:0;
+}
+.three-col-section:last-child{
+  border-right:none;
+}
+/* dark background on the sources column */
+.three-col-section--dark{
+  background:var(--bg-dark);
+  color:var(--ink-light);
+}
+.three-col-section--dark .kicker{color:var(--saffron);}
+.three-col-section--dark .section-chevron{color:var(--ink-light-dim);}
+.three-col-section--dark .collapsible-section > summary:hover .section-chevron{color:var(--saffron-bright);}
+.three-col-section--dark .source-card{border-color:rgba(255,255,255,.08);}
+.three-col-section--dark .source-card h4{color:var(--ink-light);}
+.three-col-section--dark .source-card p{color:var(--ink-light-dim);}
+/* subtle divider between overview and methodology */
+.three-col-section--mid{
+  border-left:1px solid var(--line);
+}
+/* stacked card layouts inside columns */
+.overview-stack{display:flex; flex-direction:column; gap:28px;}
+.sources-stack{display:flex; flex-direction:column; gap:20px;}
+
 /* ---------- collapsible sections (overview / methodology / sources) ---------- */
 /* Collapsed by default; native <details>/<summary> so it works even
    if JS fails, plus a small enhancement in app.js to auto-expand
@@ -535,6 +572,11 @@ code{
   .dash-layout{grid-template-columns:1fr;}
   .dash-sidebar{border-right:none; border-bottom:1px solid var(--line-dark);}
   .sources-grid{grid-template-columns:1fr; gap:20px;}
+  /* stack three columns vertically on mobile */
+  .three-col-row{grid-template-columns:1fr;}
+  .three-col-section{border-right:none; border-bottom:1px solid var(--line); padding:44px 24px;}
+  .three-col-section--mid{border-left:none;}
+  .three-col-section:last-child{border-bottom:none;}
 }
 
 /* ---------- forecast & advisory panel ---------- */
