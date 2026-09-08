@@ -50,6 +50,10 @@ let compareId = null;
 let rangeStart = 0;
 let rangeEnd = MONTHS.length - 1;
 let waterChart, priceChart, leafletMap, markers = {};
+let chartVisibility = {
+  water: { rainfall: true, water: true },
+  price: { arrivals: true, price: true }
+};
 
 function districtById(id) {
   return DISTRICTS.find(x => x.id === id);
@@ -153,6 +157,33 @@ function refreshMapHighlight() {
 // ---------------------------------------------------------------
 // Charts (respect the active date range + optional compare district)
 // ---------------------------------------------------------------
+function getPriceIndicator(data, key) {
+  if (!data || !data[key]) return '';
+  const current = data[key][data[key].length - 1];
+  const prev = data[key][Math.max(0, data[key].length - 4)];
+  const isUp = current > prev;
+  const change = Math.abs(current - prev).toFixed(1);
+  
+  return isUp 
+    ? `<span class="indicator indicator-up"><span>↑</span>Up +${change}</span>`
+    : `<span class="indicator indicator-down"><span>↓</span>Down -${change}</span>`;
+}
+
+function updateChartLegend(type, d) {
+  if (type === 'water') {
+    let html = '';
+    const meta = signalMeta(d);
+    if (chartVisibility.water.rainfall) html += `<div class="legend-item"><span class="legend-dot" style="background: rgba(92,138,166,0.35);"></span>Rainfall (mm)</div>`;
+    if (chartVisibility.water.water) html += `<div class="legend-item"><span class="legend-dot" style="background: ${COLORS.saffron};"></span>${meta.label} (${meta.unit})</div>`;
+    document.getElementById('waterLegend').innerHTML = html;
+  } else {
+    let html = '';
+    if (chartVisibility.price.arrivals) html += `<div class="legend-item"><span class="legend-dot" style="background: rgba(122,143,92,0.35);"></span>Arrivals (qtl)</div>`;
+    if (chartVisibility.price.price) html += `<div class="legend-item"><span class="legend-dot" style="background: ${COLORS.water};"></span>Modal price (₹/qtl)</div>`;
+    document.getElementById('priceLegend').innerHTML = html;
+  }
+}
+
 function renderCharts() {
   const d = districtById(currentId);
   const cmp = compareId ? districtById(compareId) : null;
@@ -170,56 +201,68 @@ function renderCharts() {
     : '';
 
   if (waterChart) waterChart.destroy();
-  const waterDatasets = [
-    { type: 'bar', label: 'Rainfall (mm)', data: slice(d.rainfall), backgroundColor: 'rgba(92,138,166,0.35)', yAxisID: 'y1', borderRadius: 2 },
-    { type: 'line', label: `${meta.label} — ${d.name.split(',')[0]} (${meta.unit})`, data: slice(d[meta.key]), borderColor: COLORS.saffron, backgroundColor: COLORS.saffron, pointRadius: 0, borderWidth: 2, tension: 0.3, yAxisID: 'y' }
-  ];
-  if (sameSignal) {
+  const waterDatasets = [];
+  if (chartVisibility.water.rainfall) {
+    waterDatasets.push({ type: 'bar', label: 'Rainfall (mm)', data: slice(d.rainfall), backgroundColor: 'rgba(92,138,166,0.35)', yAxisID: 'y1', borderRadius: 2 });
+  }
+  if (chartVisibility.water.water) {
+    waterDatasets.push({ type: 'line', label: `${meta.label} — ${d.name.split(',')[0]} (${meta.unit})`, data: slice(d[meta.key]), borderColor: COLORS.saffron, backgroundColor: COLORS.saffron, pointRadius: 0, borderWidth: 2, tension: 0.3, yAxisID: 'y' });
+  }
+  if (sameSignal && cmp && chartVisibility.water.water) {
     waterDatasets.push({
       type: 'line', label: `${meta.label} — ${cmp.name.split(',')[0]} (${meta.unit})`, data: slice(cmp[meta.key]),
       borderColor: COLORS.saffronDim, backgroundColor: COLORS.saffronDim, borderDash: [5, 4],
       pointRadius: 0, borderWidth: 2, tension: 0.3, yAxisID: 'y'
     });
   }
+  
   waterChart = new Chart(document.getElementById('waterChart'), {
     data: { labels, datasets: waterDatasets },
     options: {
       maintainAspectRatio: false,
       interaction: { mode: 'index', intersect: false },
-      plugins: { legend: { labels: { color: COLORS.ink, font: { family: 'IBM Plex Sans', size: 11 } } } },
+      plugins: { legend: { display: false } },
       scales: {
-        x: { ticks: { color: COLORS.inkDim, maxTicksLimit: 9, font: { size: 10 } }, grid: { color: COLORS.grid } },
-        y: { position: 'left', reverse: meta.reversed, title: { display: true, text: meta.axisTitle, color: COLORS.inkDim, font: { size: 10 } }, ticks: { color: COLORS.inkDim, font: { size: 10 } }, grid: { color: COLORS.grid } },
-        y1: { position: 'right', ticks: { color: COLORS.inkDim, font: { size: 10 } }, grid: { display: false } }
+        x: { ticks: { color: COLORS.inkDim, maxTicksLimit: 6, font: { size: 10 } }, grid: { color: COLORS.grid } },
+        y: { position: 'left', reverse: meta.reversed, title: { display: true, text: meta.axisTitle, color: COLORS.inkDim, font: { size: 9 } }, ticks: { color: COLORS.inkDim, font: { size: 9 } }, grid: { color: COLORS.grid } },
+        y1: { position: 'right', ticks: { color: COLORS.inkDim, font: { size: 9 } }, grid: { display: false } }
       }
     }
   });
+  updateChartLegend('water', d);
+  document.getElementById('waterIndicator').innerHTML = getPriceIndicator(d, meta.key);
 
   if (priceChart) priceChart.destroy();
-  const priceDatasets = [
-    { type: 'bar', label: 'Arrivals (qtl)', data: slice(d.arrivals), backgroundColor: 'rgba(122,143,92,0.35)', yAxisID: 'y1', borderRadius: 2 },
-    { type: 'line', label: `Modal price — ${d.name.split(',')[0]} (₹/qtl)`, data: slice(d.price), borderColor: COLORS.water, backgroundColor: COLORS.water, pointRadius: 0, borderWidth: 2, tension: 0.3, yAxisID: 'y' }
-  ];
-  if (cmp) {
+  const priceDatasets = [];
+  if (chartVisibility.price.arrivals) {
+    priceDatasets.push({ type: 'bar', label: 'Arrivals (qtl)', data: slice(d.arrivals), backgroundColor: 'rgba(122,143,92,0.35)', yAxisID: 'y1', borderRadius: 2 });
+  }
+  if (chartVisibility.price.price) {
+    priceDatasets.push({ type: 'line', label: `Modal price — ${d.name.split(',')[0]} (₹/qtl)`, data: slice(d.price), borderColor: COLORS.water, backgroundColor: COLORS.water, pointRadius: 0, borderWidth: 2, tension: 0.3, yAxisID: 'y' });
+  }
+  if (cmp && chartVisibility.price.price) {
     priceDatasets.push({
       type: 'line', label: `Modal price — ${cmp.name.split(',')[0]} (₹/qtl)`, data: slice(cmp.price),
       borderColor: COLORS.waterDim, backgroundColor: COLORS.waterDim, borderDash: [5, 4],
       pointRadius: 0, borderWidth: 2, tension: 0.3, yAxisID: 'y'
     });
   }
+  
   priceChart = new Chart(document.getElementById('priceChart'), {
     data: { labels, datasets: priceDatasets },
     options: {
       maintainAspectRatio: false,
       interaction: { mode: 'index', intersect: false },
-      plugins: { legend: { labels: { color: COLORS.ink, font: { family: 'IBM Plex Sans', size: 11 } } } },
+      plugins: { legend: { display: false } },
       scales: {
-        x: { ticks: { color: COLORS.inkDim, maxTicksLimit: 9, font: { size: 10 } }, grid: { color: COLORS.grid } },
-        y: { position: 'left', title: { display: true, text: '₹ per quintal', color: COLORS.inkDim, font: { size: 10 } }, ticks: { color: COLORS.inkDim, font: { size: 10 } }, grid: { color: COLORS.grid } },
-        y1: { position: 'right', title: { display: true, text: 'quintals', color: COLORS.inkDim, font: { size: 10 } }, ticks: { color: COLORS.inkDim, font: { size: 10 } }, grid: { display: false } }
+        x: { ticks: { color: COLORS.inkDim, maxTicksLimit: 6, font: { size: 10 } }, grid: { color: COLORS.grid } },
+        y: { position: 'left', title: { display: true, text: '₹ per quintal', color: COLORS.inkDim, font: { size: 9 } }, ticks: { color: COLORS.inkDim, font: { size: 9 } }, grid: { color: COLORS.grid } },
+        y1: { position: 'right', title: { display: true, text: 'quintals', color: COLORS.inkDim, font: { size: 9 } }, ticks: { color: COLORS.inkDim, font: { size: 9 } }, grid: { display: false } }
       }
     }
   });
+  updateChartLegend('price', d);
+  document.getElementById('priceIndicator').innerHTML = getPriceIndicator(d, 'price');
 }
 
 // ---------------------------------------------------------------
@@ -1061,6 +1104,22 @@ async function renderForecast(d) {
 }
 
 // ---------------------------------------------------------------
+// Chart toggle buttons for show/hide series
+// ---------------------------------------------------------------
+function initChartToggles() {
+  document.querySelectorAll('[data-chart]').forEach(btn => {
+    btn.addEventListener('click', function() {
+      const chart = this.dataset.chart;
+      const series = this.dataset.series;
+      
+      chartVisibility[chart][series] = !chartVisibility[chart][series];
+      this.classList.toggle('active');
+      renderCharts();
+    });
+  });
+}
+
+// ---------------------------------------------------------------
 // Wire up static controls once, then do the initial render
 // ---------------------------------------------------------------
 document.addEventListener('DOMContentLoaded', () => {
@@ -1075,6 +1134,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initSlider();
   initMap();
   initFloodWidget();
+  initChartToggles();
   renderDistrictDropdown();
   selectDistrict(currentId);
   renderGlance();
