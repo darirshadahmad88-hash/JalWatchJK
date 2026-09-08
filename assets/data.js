@@ -147,3 +147,11 @@ DISTRICTS.forEach(d => {
     d.soilMoisture = soilMoistureFromRainfall(d.rainfall, baseline, trend, noise, seed);
   }
 });
+
+// Server-side export shim — ignored by browsers (there's no `module`
+// global there), picked up by Node when lib/farmer-brief.js does
+// `require('../assets/data.js')`. Keeps this file as the single source
+// of truth for both the dashboard UI and the /api/farmer-brief endpoint.
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = { DISTRICTS, FLOOD_WATCH };
+}
