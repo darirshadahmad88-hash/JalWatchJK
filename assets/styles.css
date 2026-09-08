@@ -740,3 +740,9 @@ body.lang-ur .lang-switch{direction:ltr;}
   .lang-switch{transform:scale(0.94);}
   .plain-insight{flex-direction:column;}
 }
+
+/* ---------- dynamic sample-data banner (dashboard) ---------- */
+#dashSampleNote{transition:color .2s var(--ease);}
+#dashSampleNote b{color:var(--ink-light); font-weight:600;}
+#dashSampleNote.is-partial b{color:var(--watch);}
+#dashSampleNote.is-live b{color:var(--normal);}
