@@ -253,37 +253,108 @@ code{
   display:grid;
   grid-template-columns:repeat(3,1fr);
   align-items:start;
-  border-top:1px solid var(--line);
+  border-top:2px solid var(--saffron);
+  border-bottom:2px solid var(--saffron);
+  background:#ede8db;
+  box-shadow:inset 0 6px 28px rgba(184,103,42,0.07);
 }
 .three-col-section{
   max-width:none;
   margin:0;
-  padding:56px 36px;
+  padding:48px 36px;
   border-right:1px solid var(--line);
-  /* each column is independently scrollable when open */
   min-width:0;
+  background:transparent;
 }
 .three-col-section:last-child{
   border-right:none;
 }
-/* dark background on the sources column */
-.three-col-section--dark{
-  background:var(--bg-dark);
-  color:var(--ink-light);
-}
-.three-col-section--dark .kicker{color:var(--saffron);}
-.three-col-section--dark .section-chevron{color:var(--ink-light-dim);}
-.three-col-section--dark .collapsible-section > summary:hover .section-chevron{color:var(--saffron-bright);}
-.three-col-section--dark .source-card{border-color:rgba(255,255,255,.08);}
-.three-col-section--dark .source-card h4{color:var(--ink-light);}
-.three-col-section--dark .source-card p{color:var(--ink-light-dim);}
 /* subtle divider between overview and methodology */
 .three-col-section--mid{
   border-left:1px solid var(--line);
 }
 /* stacked card layouts inside columns */
-.overview-stack{display:flex; flex-direction:column; gap:28px;}
-.sources-stack{display:flex; flex-direction:column; gap:20px;}
+.overview-stack{display:flex; flex-direction:column; gap:24px;}
+.sources-stack{display:flex; flex-direction:column; gap:16px;}
+
+/* ---------- typography overrides for three-col info sections ---------- */
+/* Use Inter (clean professional sans) for body + DM Serif Display for headings */
+.three-col-section{
+  --info-serif:'DM Serif Display', var(--serif);
+  --info-sans:'Inter', var(--sans);
+}
+/* section kicker */
+.three-col-section .kicker{
+  font-family:var(--info-sans);
+  font-size:10px;
+  letter-spacing:.09em;
+  font-weight:600;
+}
+/* section h2 heading */
+.three-col-section .section-head h2{
+  font-family:var(--info-serif);
+  font-size:clamp(17px,2vw,22px);
+  font-weight:400;
+  letter-spacing:-.01em;
+  line-height:1.25;
+}
+/* card sub-headings */
+.three-col-section .overview-stack h3,
+.three-col-section .method-list h4,
+.three-col-section .sources-stack h4{
+  font-family:var(--info-sans);
+  font-size:12px;
+  font-weight:600;
+  letter-spacing:.02em;
+  text-transform:uppercase;
+  margin:0 0 5px;
+}
+/* card body text */
+.three-col-section .overview-stack p,
+.three-col-section .method-list p,
+.three-col-section .sources-stack p{
+  font-family:var(--info-sans);
+  font-size:12.5px;
+  line-height:1.65;
+  color:var(--ink-dim);
+}
+.three-col-section--dark .overview-stack p,
+.three-col-section--dark .method-list p,
+.three-col-section--dark .sources-stack p{
+  color:var(--ink-light-dim);
+}
+/* numbered steps */
+.three-col-section .overview-num{
+  font-family:var(--info-serif);
+  font-size:13px;
+  letter-spacing:.04em;
+}
+.three-col-section .method-step{
+  font-family:var(--info-serif);
+  font-size:18px;
+}
+/* source card links */
+.three-col-section .sources-stack a{
+  font-family:var(--info-sans);
+  font-size:11px;
+  letter-spacing:.03em;
+  font-weight:500;
+}
+/* chevron */
+.three-col-section .section-chevron{
+  font-size:20px;
+  margin-top:4px;
+  width:32px; height:32px;
+  display:flex; align-items:center; justify-content:center;
+  border:1px solid var(--line);
+  border-radius:50%;
+  background:rgba(184,103,42,0.07);
+  transition:transform .25s cubic-bezier(.4,0,.2,1), background .18s, border-color .18s;
+}
+.three-col-section .collapsible-section > summary:hover .section-chevron{
+  background:rgba(184,103,42,0.16);
+  border-color:var(--saffron);
+}
 
 /* ---------- collapsible sections (overview / methodology / sources) ---------- */
 /* Collapsed by default; native <details>/<summary> so it works even
