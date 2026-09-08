@@ -2,7 +2,7 @@
 //
 // Serverless endpoint for the "Apple health check" photo-triage widget.
 // See lib/crop-triage.js for the full scope notes, guardrails, and the
-// required ANTHROPIC_API_KEY environment variable.
+// required XAI_API_KEY environment variable.
 //
 // Expects a POST body: { imageBase64, mediaType, lang }
 // (imageBase64 is the raw base64 payload, no "data:image/...;base64," prefix)
