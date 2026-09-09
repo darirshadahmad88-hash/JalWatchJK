@@ -370,29 +370,14 @@ function updateSampleNote(d, priceLive, soilLive) {
     return;
   }
 
+  const anyLive = priceLive || (hasSoilSignal && soilLive);
   let html, cls;
-  if (hasSoilSignal) {
-    if (priceLive && soilLive) {
-      html = `<b>Live for ${name}:</b> today's soil-moisture reading and the latest mandi price. Historical trend lines in the charts below are still illustrative demo data — see the README.`;
-      cls = 'is-live';
-    } else if (soilLive) {
-      html = `<b>Live for ${name}:</b> today's soil-moisture reading. Mandi price and all historical trends below are still illustrative demo data.`;
-      cls = 'is-partial';
-    } else if (priceLive) {
-      html = `<b>Live for ${name}:</b> the latest mandi price. Soil moisture and all historical trends below are still illustrative demo data.`;
-      cls = 'is-partial';
-    } else {
-      html = `Live feeds aren't reachable right now for ${name} — every chart below is illustrative demo data. See the README for details.`;
-      cls = '';
-    }
+  if (anyLive) {
+    html = `Live feed currently present for ${name}`;
+    cls = 'is-live';
   } else {
-    if (priceLive) {
-      html = `<b>Live for ${name}:</b> the latest mandi price. Groundwater readings and all historical trends below are still illustrative demo data — India-WRIS has no stable public API yet (see README).`;
-      cls = 'is-partial';
-    } else {
-      html = `No live feed is reachable for ${name} right now — every value below, including groundwater and price, is illustrative demo data. See the README for details.`;
-      cls = '';
-    }
+    html = `${name}'s live feed currently unavailable`;
+    cls = '';
   }
   note.innerHTML = html;
   note.classList.toggle('is-live', cls === 'is-live');
