@@ -315,10 +315,10 @@ function selectDistrict(id) {
   renderCharts();
   refreshMapHighlight();
   if (leafletMap) leafletMap.panTo([d.lat, d.lon]);
-  updateSampleNote(d, null, null); // reset to a neutral "checking…" state first
+  updateSampleNote(d, null, null, null); // reset to a neutral "checking…" state first
   const token = ++sampleNoteToken;
-  Promise.all([loadLivePrice(d), loadLiveSoilMoisture(d)]).then(([priceLive, soilLive]) => {
-    if (token === sampleNoteToken) updateSampleNote(d, priceLive, soilLive);
+  Promise.all([loadLivePrice(d), loadLiveSoilMoisture(d), checkRainfallLive(d)]).then(([priceLive, soilLive, rainfallLive]) => {
+    if (token === sampleNoteToken) updateSampleNote(d, priceLive, soilLive, rainfallLive);
   });
   renderForecast(d);
   renderMetricsGrid(d);
@@ -358,7 +358,7 @@ function syncDistrictDropdown(id) {
 // README for why). Updated once both live checks below have resolved.
 // ---------------------------------------------------------------
 let sampleNoteToken = 0;
-function updateSampleNote(d, priceLive, soilLive) {
+function updateSampleNote(d, priceLive, soilLive, rainfallLive) {
   const note = document.getElementById('dashSampleNote');
   if (!note) return;
   const name = d.name.split(',')[0];
@@ -370,10 +370,21 @@ function updateSampleNote(d, priceLive, soilLive) {
     return;
   }
 
-  const anyLive = priceLive || (hasSoilSignal && soilLive);
+  const soilFeedName = hasSoilSignal ? 'soil moisture' : 'groundwater';
+  const feeds = [
+    { name: soilFeedName, live: soilLive },
+    { name: 'rainfall', live: rainfallLive },
+    { name: 'mandi price', live: priceLive }
+  ];
+  const liveNames = feeds.filter(f => f.live).map(f => f.name);
+  const demoNames = feeds.filter(f => !f.live).map(f => f.name);
+
   let html, cls;
-  if (anyLive) {
-    html = `Live feed currently present for ${name}`;
+  if (liveNames.length && demoNames.length) {
+    html = `Live feed present for ${liveNames.join(', ')} but not present for ${demoNames.join(', ')}`;
+    cls = 'is-partial';
+  } else if (liveNames.length) {
+    html = `Live feed present for ${liveNames.join(', ')} — all current for ${name}`;
     cls = 'is-live';
   } else {
     html = `${name}'s live feed currently unavailable`;
@@ -382,6 +393,18 @@ function updateSampleNote(d, priceLive, soilLive) {
   note.innerHTML = html;
   note.classList.toggle('is-live', cls === 'is-live');
   note.classList.toggle('is-partial', cls === 'is-partial');
+}
+
+// Lightweight rainfall-live check just for the top note above — the
+// actual rainfall figure and DOM update happens separately inside
+// renderMetricsGrid(); this only needs the live/demo boolean.
+async function checkRainfallLive(d) {
+  try {
+    const res = await fetchWithTimeout(`/api/rainfall?lat=${d.lat}&lon=${d.lon}`);
+    return res.ok;
+  } catch (err) {
+    return false;
+  }
 }
 
 // ---------------------------------------------------------------
