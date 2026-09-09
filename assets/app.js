@@ -405,23 +405,31 @@ async function loadLiveSoilMoisture(d) {
   const meta = signalMeta(d);
 
   if (meta.key !== 'soilMoisture') {
-    hint.textContent = 'Groundwater feed not wired live yet — see README';
-    hint.classList.remove('is-live');
+    if (hint) {
+      hint.textContent = 'Groundwater feed not wired live yet — see README';
+      hint.classList.remove('is-live');
+    }
     return false;
   }
 
-  hint.textContent = 'Checking NASA POWER…';
-  hint.classList.remove('is-live');
+  if (hint) {
+    hint.textContent = 'Checking NASA POWER…';
+    hint.classList.remove('is-live');
+  }
   try {
     const res = await fetchWithTimeout(`/api/soil-moisture?lat=${d.lat}&lon=${d.lon}`);
     if (!res.ok) throw new Error(`status ${res.status}`);
     const payload = await res.json();
-    hint.textContent = `● Live: ${payload.root_zone_wetness_pct}% root-zone wetness (NASA POWER, ${payload.date})`;
-    hint.classList.add('is-live');
+    if (hint) {
+      hint.textContent = `● Live: ${payload.root_zone_wetness_pct}% root-zone wetness (NASA POWER, ${payload.date})`;
+      hint.classList.add('is-live');
+    }
     return true;
   } catch (err) {
-    hint.textContent = 'Demo trend shown — live feed unavailable right now';
-    hint.classList.remove('is-live');
+    if (hint) {
+      hint.textContent = 'Demo trend shown — live feed unavailable right now';
+      hint.classList.remove('is-live');
+    }
     return false;
   }
 }
