@@ -21,7 +21,7 @@ See methodology step 1 on the page.
 - **Soil moisture** — the *current reading* shown next to the chart title is
   now genuinely live, pulled from NASA POWER's `GWETROOT` parameter (root-zone
   soil wetness, no API key needed — see `/api/soil-moisture` in
-  `server.js`/`netlify/functions/soil-moisture.js`). One honest caveat: this
+  `server.js`). One honest caveat: this
   is a MERRA-2 *reanalysis* product (model + satellite + station data
   blended), not a raw SMAP satellite retrieval — SMAP itself needs a NASA
   Earthdata login and heavier processing, so POWER is the practical
@@ -35,8 +35,9 @@ See methodology step 1 on the page.
   and the live/demo badge next to the stress index.
 
 No build step for the frontend itself — plain HTML/CSS/JS + Chart.js from a
-CDN. The live-price feature needs one small serverless function (Netlify) or
-a tiny Node server (Render) — both are included and already wired up.
+CDN. The live-price feature (and the other live API routes below) run
+through a small Express server (`server.js`), deployed on Vercel as a
+serverless function.
 
 ## File structure
 
@@ -47,19 +48,17 @@ jk-water-watch/
 │   ├── styles.css
 │   ├── data.js                 # demo data (water levels + historical trend) — swap for a real feed later
 │   └── app.js                  # chart rendering + live-price fetch
-├── netlify/functions/
-│   └── mandi-prices.js         # serverless proxy to the Agmarknet API (Netlify path)
-├── server.js                   # Express server exposing the same API (Render/Node path)
-├── package.json                # only needed for the Render/Node path
+├── lib/                        # shared server-side logic (crop triage, flood sources, farmer brief)
+├── server.js                   # Express server exposing all /api routes, deployed on Vercel
+├── package.json
+├── vercel.json                 # tells Vercel to run server.js as a function and bundle static assets with it
 ├── scripts/
 │   └── ingestion_starter.py    # Python scaffold for the WRIS/groundwater side
-├── netlify.toml                # functions + /api redirect + headers
-├── render.yaml
 └── README.md
 ```
 
-Both deploy paths expose the **same** endpoint — `/api/mandi-prices` — so
-`assets/app.js` doesn't need to know which platform it's on.
+All `/api/*` routes are defined once in `server.js` and shared modules under
+`lib/`, and run on Vercel as a single serverless function.
 
 ## Run it locally
 
@@ -79,43 +78,31 @@ so you need internet access either way).
 The live-price feature needs a free key:
 1. Register at [data.gov.in/user/register](https://data.gov.in/user/register)
 2. Once logged in, go to "My Account" → "API Keys" and copy your key
-3. You'll paste this into an environment variable in whichever platform you deploy to — never commit it into the code
+3. You'll paste this into an environment variable in your Vercel project settings — never commit it into the code
 
 Without this key set, the site still works fine — the badge just shows
 "Demo price data" and the charts run on the bundled sample values.
 
-## Deploy to Netlify (drag-and-drop still works, plus the live function)
+## Deploy to Vercel
 
-**Drag-and-drop:**
-1. Go to [app.netlify.com/drop](https://app.netlify.com/drop) and drag the
-   `jk-water-watch` folder onto the page — you get a live URL immediately
-2. To enable live prices: Site settings → Environment variables → add
-   `DATA_GOV_IN_API_KEY` with your key → trigger a redeploy (drag the folder
-   again, or use "Deploys" → "Trigger deploy")
+1. Push this folder to a GitHub repo (make sure `vercel.json` is committed
+   at the repo root, alongside `server.js` and `package.json`)
+2. In Vercel: "Add New" → "Project" → import the repo
+3. Confirm the **Root Directory** in project settings points at the repo
+   root (not a subfolder) — that's where `server.js` and `vercel.json` live
+4. Project Settings → Environment Variables → add whichever of these you
+   have keys for: `DATA_GOV_IN_API_KEY`, `GOOGLE_FLOOD_API_KEY`,
+   `ANTHROPIC_API_KEY`, `AGMARKNET_RESOURCE_ID` (optional override),
+   `ANTHROPIC_MODEL` (optional override)
+5. Deploy. `vercel.json` tells Vercel to run `server.js` as a single
+   serverless function and bundle `index.html`, `assets/`, and `lib/`
+   alongside it, so one function serves the static site *and* every
+   `/api/*` route
+6. Every push to the connected branch triggers an automatic redeploy
 
-**From a Git repo (recommended once you want the function working smoothly):**
-1. Push this folder to a GitHub repo
-2. In Netlify: "Add new site" → "Import an existing project" → pick the repo
-3. Build command: leave blank. Publish directory: `.` — `netlify.toml`
-   already points Netlify at the `netlify/functions` folder
-4. Site settings → Environment variables → add `DATA_GOV_IN_API_KEY`
-5. Deploy. The badge on the dashboard should flip to "● Live from Agmarknet"
-   for markets the API returns data for
-
-## Deploy to Render
-
-The static-site path (no live prices) works exactly as before: New → Static
-Site → publish directory `.`.
-
-**For the live-price version, deploy as a Web Service instead** (Render's
-static sites can't run server code):
-1. Push this folder to a GitHub repo
-2. In Render: "New" → "Web Service" → connect the repo
-3. Build command: `npm install`. Start command: `node server.js`
-4. Environment → add `DATA_GOV_IN_API_KEY`
-5. Deploy — `server.js` serves the static site *and* `/api/mandi-prices`
-
-Either platform redeploys automatically on every push once connected.
+Any feature without its key set falls back to a clearly labelled demo
+response rather than failing — see the honesty notes throughout this
+README for exactly which pieces that applies to.
 
 ## Flood Watch widget (top-right corner)
 
@@ -138,10 +125,8 @@ little), so it's kept as its own module rather than folded into the
   flood data" reading (a calm, non-alarming Normal status) rather than
   guessing — same honesty pattern as the rest of this project.
 - **To make it live:** once approved, set `GOOGLE_FLOOD_API_KEY` as an
-  environment variable (same place as `DATA_GOV_IN_API_KEY`) on
-  Netlify or Render and redeploy. The endpoint is `/api/flood-level`,
-  wired up identically on both platforms
-  (`netlify/functions/flood-level.js` / the route in `server.js`).
+  environment variable (same place as `DATA_GOV_IN_API_KEY`) in Vercel and
+  redeploy. The endpoint is `/api/flood-level` in `server.js`.
 - **What's deliberately not included:** live NH44 road/traffic status.
   There's no public dataset or API for this — closures are announced
   via J&K Traffic Police's social media posts, which aren't reliably
@@ -181,10 +166,9 @@ point-to-a-human, not diagnosis or prescription:**
   this page.
 - **To make it live:** set `ANTHROPIC_API_KEY` (get one at
   [console.anthropic.com](https://console.anthropic.com)) as an
-  environment variable on Netlify or Render and redeploy. Optionally
-  set `ANTHROPIC_MODEL` to override the default model. The endpoint is
-  `/api/crop-triage`, wired up on both platforms
-  (`netlify/functions/crop-triage.js` / the route in `server.js`).
+  environment variable in Vercel and redeploy. Optionally set
+  `ANTHROPIC_MODEL` to override the default model. The endpoint is
+  `/api/crop-triage` in `server.js`.
 - **Real limitation worth stating up front:** a single fruit photo
   often isn't enough to tell fungal disease, pest damage, and nutrient
   deficiency apart — that's exactly why this is framed as low-stakes
@@ -228,7 +212,7 @@ set, that half is live.
    to change.
 
 **Soil moisture — the current reading is done; the historical chart is what's left:**
-1. `/api/soil-moisture` (in `server.js` and `netlify/functions/soil-moisture.js`)
+1. `/api/soil-moisture` (in `server.js`)
    already pulls the live current reading from NASA POWER's `GWETROOT`
    parameter — no API key needed, nothing to set up. `loadLiveSoilMoisture()`
    in `assets/app.js` calls it whenever you select an apple district and
